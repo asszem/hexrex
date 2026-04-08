@@ -7,6 +7,10 @@ import { t } from "../core/i18n.js";
 export function bindBoardInteraction(store, dom, renderApp) {
   let pendingTap = null;
 
+  function isAiTurn() {
+    return store.state.players.find((entry) => entry.id === store.state.currentPlayer)?.controlType === "ai";
+  }
+
   function undoLastMove() {
     const undone = popHistorySnapshot(store.state);
     store.state.status = undone ? t("status.lastMoveUndone") : t("status.noMoveToUndo");
@@ -15,7 +19,7 @@ export function bindBoardInteraction(store, dom, renderApp) {
 
   dom.board.addEventListener("mousemove", (event) => {
     const polygon = event.target.closest("polygon[data-key]");
-    if (!polygon || store.state.gameOver || store.state.aiThinking) {
+    if (!polygon || store.state.gameOver || store.state.aiThinking || store.state.aiPaused || isAiTurn()) {
       return;
     }
 
@@ -32,7 +36,7 @@ export function bindBoardInteraction(store, dom, renderApp) {
   dom.board.addEventListener("mouseleave", () => {
     store.state.hoverKey = null;
     clearPreview(store.state);
-    if (!store.state.aiThinking) {
+    if (!store.state.aiThinking && !store.state.aiPaused && !isAiTurn()) {
       store.state.status = t("status.hoverPreview");
     }
     renderApp();
@@ -44,7 +48,7 @@ export function bindBoardInteraction(store, dom, renderApp) {
     }
 
     const polygon = event.target.closest("polygon[data-key]");
-    if (!polygon || store.state.gameOver || store.state.aiThinking) {
+    if (!polygon || store.state.gameOver || store.state.aiThinking || store.state.aiPaused || isAiTurn()) {
       return;
     }
     pendingTap = {
@@ -77,7 +81,16 @@ export function bindBoardInteraction(store, dom, renderApp) {
     const tapKey = pendingTap.key;
     pendingTap = null;
 
-    if (duration > 180 || moved > 8 || !polygon || polygon.dataset.key !== tapKey || store.state.gameOver || store.state.aiThinking) {
+    if (
+      duration > 180 ||
+      moved > 8 ||
+      !polygon ||
+      polygon.dataset.key !== tapKey ||
+      store.state.gameOver ||
+      store.state.aiThinking ||
+      store.state.aiPaused ||
+      isAiTurn()
+    ) {
       return;
     }
 

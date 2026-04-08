@@ -19,6 +19,7 @@ export function createInitialState(config = {}) {
     gameOver: false,
     endgameDismissed: false,
     aiThinking: false,
+    aiPaused: false,
     status: t("status.hoverPreview"),
     preview: null,
     hintCells: [],
@@ -52,6 +53,7 @@ export function cloneState(state) {
       : null,
     hintCells: [...(state.hintCells ?? [])],
     aiThinking: Boolean(state.aiThinking),
+    aiPaused: Boolean(state.aiPaused),
     consecutivePasses: state.consecutivePasses ?? 0,
     endgameDismissed: Boolean(state.endgameDismissed),
   };
@@ -78,6 +80,7 @@ export function pushHistorySnapshot(state) {
     rules: { ...state.rules },
     consecutivePasses: state.consecutivePasses ?? 0,
     endgameDismissed: Boolean(state.endgameDismissed),
+    aiPaused: Boolean(state.aiPaused),
     cells: new Map(
       Array.from(state.cells.entries(), ([key, value]) => [
         key,
@@ -112,5 +115,6 @@ export function popHistorySnapshot(state) {
   state.gameOver = false;
   state.endgameDismissed = false;
   state.aiThinking = false;
+  state.aiPaused = false;
   return true;
 }

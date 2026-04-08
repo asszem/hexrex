@@ -5,6 +5,7 @@ export function getDomRefs() {
     boardContent: document.getElementById("board-content"),
     hintButton: document.getElementById("hint-button"),
     passButton: document.getElementById("pass-button"),
+    pauseAiButton: document.getElementById("pause-ai-button"),
     langHuButton: document.getElementById("lang-hu"),
     langEnButton: document.getElementById("lang-en"),
     newGameButton: document.getElementById("new-game-button"),

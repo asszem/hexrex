@@ -75,7 +75,7 @@ function renderApp() {
   const activePlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
   const aiTurnActive = Boolean(activePlayer && activePlayer.controlType === "ai" && !store.state.gameOver);
   if (aiTurnActive) {
-    store.state.aiThinking = true;
+    store.state.aiThinking = !store.state.aiPaused;
     store.state.preview = null;
     store.state.hoverKey = null;
   }
@@ -93,6 +93,8 @@ function renderApp() {
   applyStaticTranslations();
   dom.zoomLevel.textContent = t("zoom.level", { percent: Math.round(viewport.zoom * 100) });
   dom.hintButton.textContent = store.state.hintCells?.length ? t("button.hide") : t("button.hint");
+  dom.pauseAiButton.textContent = store.state.aiPaused ? t("button.resume") : t("button.pause");
+  dom.pauseAiButton.disabled = store.state.gameOver || !aiTurnActive;
   if (dom.passButton) {
     dom.passButton.disabled = store.state.gameOver || store.state.aiThinking;
   }
@@ -133,6 +135,7 @@ function applyStaticTranslations() {
   dom.langEnButton.querySelector("img")?.setAttribute("alt", t("aria.flagEnglish"));
   dom.hintButton.textContent = store.state.hintCells?.length ? t("button.hide") : t("button.hint");
   dom.passButton.textContent = t("button.pass");
+  dom.pauseAiButton.textContent = store.state.aiPaused ? t("button.resume") : t("button.pause");
   dom.newGameButton.textContent = t("button.newGame");
   dom.zoomResetButton.textContent = t("button.resetZoom");
   dom.playerStatusLabel.textContent = t("panel.playerStatus");
@@ -164,6 +167,7 @@ dom.newGameButton.addEventListener("click", openSetupModal);
 if (dom.passButton) {
   dom.passButton.addEventListener("click", applyPassTurn);
 }
+dom.pauseAiButton.addEventListener("click", toggleAiPause);
 dom.langHuButton.addEventListener("click", async () => {
   await setLanguage("hu");
   renderSetupModal(dom, setupDraft);
@@ -474,6 +478,13 @@ function scheduleAiTurn() {
   const player = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
   if (!player || player.controlType !== "ai") {
     store.state.aiThinking = false;
+    store.state.aiPaused = false;
+    return;
+  }
+
+  if (store.state.aiPaused) {
+    store.state.aiThinking = false;
+    store.state.status = t("status.aiPaused", { name: player.name });
     return;
   }
 
@@ -489,7 +500,9 @@ function scheduleAiTurn() {
       store.state.aiThinking = false;
       return;
     }
-    const move = await chooseAiMove(store.state, activePlayer);
+    const move = await chooseAiMove(store.state, activePlayer, {
+      shouldAbort: () => currentToken !== aiTurnToken || store.state.aiPaused || store.state.gameOver,
+    });
     if (!move || currentToken !== aiTurnToken) {
       store.state.aiThinking = false;
       return;
@@ -504,6 +517,28 @@ function scheduleAiTurn() {
     store.state.hintCells = [];
     renderApp();
   }, 260);
+}
+
+function toggleAiPause() {
+  const activePlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
+  if (!activePlayer || activePlayer.controlType !== "ai" || store.state.gameOver) {
+    return;
+  }
+
+  store.state.aiPaused = !store.state.aiPaused;
+  aiTurnToken += 1;
+  if (aiTurnTimer) {
+    window.clearTimeout(aiTurnTimer);
+    aiTurnTimer = null;
+  }
+  store.state.aiThinking = false;
+  store.state.preview = null;
+  store.state.hoverKey = null;
+  store.state.hintCells = [];
+  store.state.status = store.state.aiPaused
+    ? t("status.aiPaused", { name: activePlayer.name })
+    : t("status.aiThinking", { name: activePlayer.name });
+  renderApp();
 }
 
 function buildRuleLines(rules) {

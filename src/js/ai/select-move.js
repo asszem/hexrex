@@ -2,17 +2,18 @@ import { cloneState } from "../core/state.js";
 import { buildPlacementPreview } from "../core/placement-rules.js";
 import { buildRemovalPreview } from "../core/removal-rules.js";
 import { placementCausesSelfCapture } from "../core/move-validation.js";
-import { getScoreSummary, hasAnyLegalPlacement } from "../core/scoring.js";
+import { getScoreSummary } from "../core/scoring.js";
 import { applyResolvedMove } from "../core/apply-move.js";
 import { t } from "../core/i18n.js";
+import { getNeighbors } from "../core/board.js";
 
-const COLLECTION_BATCH_SIZE = 36;
+const COLLECTION_BATCH_SIZE = 24;
 const SCORING_BATCH_SIZE = 8;
 
-export async function chooseAiMove(state, player) {
+export async function chooseAiMove(state, player, options = {}) {
   const maxMoves = getCandidateLimit(state, player);
-  const moves = await collectCandidateMoves(state, maxMoves);
-  if (moves.length === 0 || !hasAnyLegalPlacement(state, player.id, buildPlacementPreview)) {
+  const moves = await collectCandidateMoves(state, maxMoves, options);
+  if (moves.length === 0) {
     return buildPassMove(state, player, t("status.noLegalPlacementPassing"));
   }
 
@@ -24,6 +25,9 @@ export async function chooseAiMove(state, player) {
   let bestScore = Number.NEGATIVE_INFINITY;
 
   for (let index = 0; index < moves.length; index += 1) {
+    if (options.shouldAbort?.()) {
+      return null;
+    }
     const move = moves[index];
     const score = scoreMove(state, move, player);
     if (score > bestScore) {
@@ -41,43 +45,45 @@ export async function chooseAiMove(state, player) {
   return bestMove;
 }
 
-async function collectCandidateMoves(state, maxMoves) {
+async function collectCandidateMoves(state, maxMoves, options = {}) {
   const moves = [];
-  let seenValidMoves = 0;
+  const candidateKeys = buildCandidateKeys(state, maxMoves);
 
-  for (let row = 0; row < state.boardSize; row += 1) {
-    for (let col = 0; col < state.boardSize; col += 1) {
-      const key = `${col},${row}`;
-      const placement = buildPlacementPreview(state, key);
-      if (placement.valid && !placementCausesSelfCapture(state, placement)) {
-        seenValidMoves += 1;
-        sampleMove(moves, placement, seenValidMoves, maxMoves);
-      }
+  for (let index = 0; index < candidateKeys.length; index += 1) {
+    if (options.shouldAbort?.()) {
+      return [];
+    }
 
-      const removal = buildRemovalPreview(state, key);
-      if (removal.valid) {
-        seenValidMoves += 1;
-        sampleMove(moves, removal, seenValidMoves, maxMoves);
-      }
+    const key = candidateKeys[index];
+    const placement = buildPlacementPreview(state, key);
+    if (placement.valid && !placementCausesSelfCapture(state, placement)) {
+      pushUniqueMove(moves, placement, maxMoves);
+    }
 
-      if ((row * state.boardSize + col + 1) % COLLECTION_BATCH_SIZE === 0) {
-        await yieldToBrowser();
-      }
+    const removal = buildRemovalPreview(state, key);
+    if (removal.valid) {
+      pushUniqueMove(moves, removal, maxMoves);
+    }
+
+    if ((index + 1) % COLLECTION_BATCH_SIZE === 0) {
+      await yieldToBrowser();
     }
   }
 
   return moves;
 }
 
-function sampleMove(moves, move, seenValidMoves, maxMoves) {
+function pushUniqueMove(moves, move, maxMoves) {
+  const signature = `${move.type}:${[...move.cells].sort().join("|")}`;
+  if (moves.some((entry) => `${entry.type}:${[...entry.cells].sort().join("|")}` === signature)) {
+    return;
+  }
   if (moves.length < maxMoves) {
     moves.push(move);
     return;
   }
-  const replacementIndex = Math.floor(Math.random() * seenValidMoves);
-  if (replacementIndex < maxMoves) {
-    moves[replacementIndex] = move;
-  }
+  const replacementIndex = Math.floor(Math.random() * maxMoves);
+  moves[replacementIndex] = move;
 }
 
 function scoreMove(state, move, player) {
@@ -128,6 +134,51 @@ function getCandidateLimit(state, player) {
     return Math.min(Math.max(48, Math.ceil(boardArea * 0.12)), 220);
   }
   return Math.min(Math.max(72, Math.ceil(boardArea * 0.18)), 320);
+}
+
+function buildCandidateKeys(state, maxMoves) {
+  const keys = new Set();
+  const boardArea = state.boardSize * state.boardSize;
+  const playerCells = Array.from(state.cells.entries())
+    .filter(([, cell]) => cell.owner === state.currentPlayer)
+    .map(([key]) => key);
+
+  addCenterKeys(keys, state.boardSize);
+  addRandomEmptyKeys(state, keys, Math.min(maxMoves, boardArea));
+
+  if (playerCells.length === 0 || !state.rules?.extension) {
+    return [...keys];
+  }
+
+  for (const key of playerCells) {
+    keys.add(key);
+    for (const neighborKey of getNeighbors(key, state.boardSize)) {
+      keys.add(neighborKey);
+    }
+  }
+
+  addRandomEmptyKeys(state, keys, Math.max(12, Math.floor(maxMoves / 3)));
+  return [...keys];
+}
+
+function addCenterKeys(keys, boardSize) {
+  const center = Math.floor(boardSize / 2);
+  for (let row = Math.max(0, center - 1); row <= Math.min(boardSize - 1, center + 1); row += 1) {
+    for (let col = Math.max(0, center - 1); col <= Math.min(boardSize - 1, center + 1); col += 1) {
+      keys.add(`${col},${row}`);
+    }
+  }
+}
+
+function addRandomEmptyKeys(state, keys, attempts) {
+  for (let index = 0; index < attempts; index += 1) {
+    const col = Math.floor(Math.random() * state.boardSize);
+    const row = Math.floor(Math.random() * state.boardSize);
+    const key = `${col},${row}`;
+    if (!state.cells.has(key)) {
+      keys.add(key);
+    }
+  }
 }
 
 function yieldToBrowser() {
