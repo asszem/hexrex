@@ -21,9 +21,11 @@ export function renderSetupModal(dom, draft) {
   dom.setupExtension.checked = Boolean(draft.rules.extension);
   dom.setupBorderProtection.checked = Boolean(draft.rules.borderProtection);
   dom.setupRemoveHex.checked = Boolean(draft.rules.removeHex);
+  dom.setupKeepConnected.checked = Boolean(draft.rules.keepConnected);
   dom.setupExtensionState.textContent = draft.rules.extension ? t("setup.toggle.on") : t("setup.toggle.off");
   dom.setupBorderProtectionState.textContent = draft.rules.borderProtection ? t("setup.toggle.on") : t("setup.toggle.off");
   dom.setupRemoveHexState.textContent = draft.rules.removeHex ? t("setup.toggle.on") : t("setup.toggle.off");
+  dom.setupKeepConnectedState.textContent = draft.rules.keepConnected ? t("setup.toggle.on") : t("setup.toggle.off");
   dom.setupExtensionDesc.textContent = draft.rules.extension
     ? t("setup.rule.extension.on")
     : t("setup.rule.extension.off");
@@ -33,6 +35,9 @@ export function renderSetupModal(dom, draft) {
   dom.setupRemoveHexDesc.textContent = draft.rules.removeHex
     ? t("setup.rule.removeHex.on")
     : t("setup.rule.removeHex.off");
+  dom.setupKeepConnectedDesc.textContent = draft.rules.keepConnected
+    ? t("setup.rule.keepConnected.on")
+    : t("setup.rule.keepConnected.off");
 
   dom.setupPlayerList.innerHTML = draft.players
     .map(

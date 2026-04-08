@@ -25,6 +25,9 @@ export function getDomRefs() {
     setupRemoveHex: document.getElementById("setup-remove-hex"),
     setupRemoveHexState: document.getElementById("setup-remove-hex-state"),
     setupRemoveHexDesc: document.getElementById("setup-remove-hex-desc"),
+    setupKeepConnected: document.getElementById("setup-keep-connected"),
+    setupKeepConnectedState: document.getElementById("setup-keep-connected-state"),
+    setupKeepConnectedDesc: document.getElementById("setup-keep-connected-desc"),
     setupPlayerList: document.getElementById("setup-player-list"),
     addPlayerRow: document.getElementById("add-player-row"),
     newPlayerSwatch: document.getElementById("new-player-swatch"),
@@ -50,5 +53,6 @@ export function getDomRefs() {
     setupExtensionLabel: document.getElementById("setup-extension-label"),
     setupBorderProtectionLabel: document.getElementById("setup-border-protection-label"),
     setupRemoveHexLabel: document.getElementById("setup-remove-hex-label"),
+    setupKeepConnectedLabel: document.getElementById("setup-keep-connected-label"),
   };
 }

@@ -8,6 +8,15 @@ export function buildPlacementPreview(state, anchorKey) {
     return invalidPreview(anchorKey, t("preview.cellOccupied"));
   }
 
+  const touchingOwnNeighbors = DIRECTIONS
+    .map((direction) => ({ direction, key: getNeighborKey(anchorKey, direction, state.boardSize) }))
+    .filter(({ key }) => key && getCellState(state, key)?.owner === state.currentPlayer);
+  const currentPlayerOwnsHexes = playerOwnsAnyHex(state, state.currentPlayer);
+
+  if (state.rules?.keepConnected && currentPlayerOwnsHexes && touchingOwnNeighbors.length === 0) {
+    return invalidPreview(anchorKey, t("preview.mustStayConnected"));
+  }
+
   if (!state.rules?.extension) {
     return {
       type: "place",
@@ -16,10 +25,6 @@ export function buildPlacementPreview(state, anchorKey) {
       reason: t("preview.placeOneAnywhere"),
     };
   }
-
-  const touchingOwnNeighbors = DIRECTIONS
-    .map((direction) => ({ direction, key: getNeighborKey(anchorKey, direction, state.boardSize) }))
-    .filter(({ key }) => key && getCellState(state, key)?.owner === state.currentPlayer);
 
   if (touchingOwnNeighbors.length === 0) {
     return {
@@ -93,4 +98,13 @@ function invalidPreview(anchorKey, reason) {
     cells: [anchorKey],
     reason,
   };
+}
+
+function playerOwnsAnyHex(state, playerId) {
+  for (const cell of state.cells.values()) {
+    if (cell.owner === playerId) {
+      return true;
+    }
+  }
+  return false;
 }

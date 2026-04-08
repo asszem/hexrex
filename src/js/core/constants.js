@@ -5,6 +5,7 @@ export const DEFAULT_RULES = {
   extension: true,
   borderProtection: true,
   removeHex: true,
+  keepConnected: false,
 };
 export const MAX_PLAYERS = 10;
 export const BOARD_VIEW_WIDTH = 960;

@@ -167,6 +167,7 @@ function applyStaticTranslations() {
   dom.setupExtensionLabel.textContent = t("setup.extension");
   dom.setupBorderProtectionLabel.textContent = t("setup.borderProtection");
   dom.setupRemoveHexLabel.textContent = t("setup.removeHex");
+  dom.setupKeepConnectedLabel.textContent = t("setup.keepConnected");
   dom.confirmAddPlayer.textContent = t("button.add");
   dom.confirmNewGame.textContent = t("button.startGame");
   dom.endgameModal.querySelector(".endgame-actions button").textContent = t("button.close");
@@ -234,6 +235,11 @@ dom.setupBorderProtection.addEventListener("change", () => {
 
 dom.setupRemoveHex.addEventListener("change", () => {
   setupDraft.rules.removeHex = dom.setupRemoveHex.checked;
+  renderSetupModal(dom, setupDraft);
+});
+
+dom.setupKeepConnected.addEventListener("change", () => {
+  setupDraft.rules.keepConnected = dom.setupKeepConnected.checked;
   renderSetupModal(dom, setupDraft);
 });
 
@@ -701,6 +707,7 @@ function buildRuleLines(rules) {
     rules.extension ? t("rules.extension.on") : t("rules.extension.off"),
     rules.borderProtection ? t("rules.borderProtection.on") : t("rules.borderProtection.off"),
     rules.removeHex ? t("rules.removeHex.on") : t("rules.removeHex.off"),
+    rules.keepConnected ? t("rules.keepConnected.on") : t("rules.keepConnected.off"),
     t("rules.passAllowed"),
     t("rules.forcedPasses"),
     t("rules.allPassEnd"),
