@@ -157,29 +157,26 @@ dom.setupPlayerList.addEventListener("input", (event) => {
     return;
   }
   const index = Number(input.dataset.playerIndex);
-  setupDraft.players[index].name = input.value;
+  setupDraft.players[index].name = input.value.slice(0, 10);
+  if (input.value !== setupDraft.players[index].name) {
+    input.value = setupDraft.players[index].name;
+  }
 });
 
 dom.setupPlayerList.addEventListener("change", (event) => {
-  const select = event.target.closest(".setup-player-control");
-  if (select) {
-    const index = Number(select.dataset.playerIndex);
-    setupDraft.players[index].controlType = select.value;
-    if (select.value !== "ai") {
-      setupDraft.players[index].difficulty = "easy";
-    } else if (!setupDraft.players[index].difficulty) {
-      setupDraft.players[index].difficulty = "medium";
-    }
-    renderSetupModal(dom, setupDraft);
+  const mode = event.target.closest(".setup-player-mode");
+  if (!mode) {
     return;
   }
-
-  const difficulty = event.target.closest(".setup-player-difficulty");
-  if (!difficulty) {
-    return;
+  const index = Number(mode.dataset.playerIndex);
+  if (mode.value === "human") {
+    setupDraft.players[index].controlType = "human";
+    setupDraft.players[index].difficulty = "easy";
+  } else {
+    setupDraft.players[index].controlType = "ai";
+    setupDraft.players[index].difficulty = mode.value;
   }
-  const index = Number(difficulty.dataset.playerIndex);
-  setupDraft.players[index].difficulty = difficulty.value;
+  renderSetupModal(dom, setupDraft);
 });
 
 dom.confirmAddPlayer.addEventListener("click", () => {
@@ -190,7 +187,7 @@ dom.confirmAddPlayer.addEventListener("click", () => {
   const palette = PLAYER_PALETTE[setupDraft.players.length % PLAYER_PALETTE.length];
   setupDraft.players.push({
     id: `player${setupDraft.players.length + 1}`,
-    name,
+    name: name.slice(0, 10),
     controlType: "human",
     difficulty: "easy",
     ...palette,

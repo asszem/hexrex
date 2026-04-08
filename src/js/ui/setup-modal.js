@@ -37,17 +37,14 @@ export function renderSetupModal(dom, draft) {
             class="setup-player-input"
             data-player-index="${index}"
             type="text"
-            maxlength="20"
+            maxlength="10"
             value="${escapeAttribute(player.name)}"
           />
-          <select class="setup-player-control" data-player-index="${index}">
+          <select class="setup-player-mode" data-player-index="${index}">
             <option value="human" ${player.controlType !== "ai" ? "selected" : ""}>Human</option>
-            <option value="ai" ${player.controlType === "ai" ? "selected" : ""}>AI</option>
-          </select>
-          <select class="setup-player-difficulty" data-player-index="${index}" ${player.controlType === "ai" ? "" : "disabled"}>
-            <option value="easy" ${player.difficulty === "easy" ? "selected" : ""}>Easy</option>
-            <option value="medium" ${player.difficulty === "medium" ? "selected" : ""}>Medium</option>
-            <option value="hard" ${player.difficulty === "hard" ? "selected" : ""}>Hard</option>
+            <option value="hard" ${player.controlType === "ai" && player.difficulty === "hard" ? "selected" : ""}>Strong AI</option>
+            <option value="medium" ${player.controlType === "ai" && player.difficulty === "medium" ? "selected" : ""}>Medium AI</option>
+            <option value="easy" ${player.controlType === "ai" && player.difficulty === "easy" ? "selected" : ""}>Weak AI</option>
           </select>
         </article>
       `,

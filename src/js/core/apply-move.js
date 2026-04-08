@@ -13,8 +13,12 @@ export function applyResolvedMove(state, preview) {
 
   pushHistorySnapshot(state);
   state.endgameDismissed = false;
+  const activePlayer = state.players.find((player) => player.id === state.currentPlayer);
 
   if (preview.type === "place") {
+    if (activePlayer) {
+      activePlayer.passedLastTurn = false;
+    }
     for (const key of preview.cells) {
       setCellState(state, key, {
         owner: state.currentPlayer,
@@ -29,9 +33,15 @@ export function applyResolvedMove(state, preview) {
         : preview.reason;
     state.consecutivePasses = 0;
   } else if (preview.type === "pass") {
+    if (activePlayer) {
+      activePlayer.passedLastTurn = true;
+    }
     state.status = preview.reason;
     state.consecutivePasses = (state.consecutivePasses ?? 0) + 1;
   } else {
+    if (activePlayer) {
+      activePlayer.passedLastTurn = false;
+    }
     setCellState(state, preview.cells[0], null);
     state.status = preview.reason;
     state.consecutivePasses = 0;

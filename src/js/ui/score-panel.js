@@ -27,10 +27,11 @@ export function renderScorePanel(dom, state) {
 }
 
 function formatPlayerLabel(player) {
+  const passSuffix = player.passedLastTurn ? " PASS" : "";
   if (player.controlType === "ai") {
-    return `${player.name} (AI - ${capitalize(player.difficulty ?? "medium")})`;
+    return `${player.name} (AI - ${capitalize(player.difficulty ?? "medium")})${passSuffix}`;
   }
-  return player.name;
+  return `${player.name}${passSuffix}`;
 }
 
 function capitalize(value) {

@@ -1,7 +1,10 @@
 import { DEFAULT_GRID_SIZE, DEFAULT_RULES, createDefaultPlayers } from "./constants.js";
 
 export function createInitialState(config = {}) {
-  const players = config.players ?? createDefaultPlayers(2);
+  const players = (config.players ?? createDefaultPlayers(2)).map((player) => ({
+    ...player,
+    passedLastTurn: Boolean(player.passedLastTurn),
+  }));
   return {
     currentPlayer: players[0].id,
     players,
@@ -32,6 +35,7 @@ export function cloneState(state) {
     ),
     history: state.history.map((entry) => ({
       ...entry,
+      players: entry.players.map((player) => ({ ...player })),
       cells: new Map(
         Array.from(entry.cells.entries(), ([key, value]) => [
           key,
