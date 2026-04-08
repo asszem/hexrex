@@ -411,9 +411,26 @@ dom.boardWrapper.addEventListener(
 );
 
 let dragState = null;
+const activeBoardPointers = new Map();
+let pinchState = null;
 
 dom.boardWrapper.addEventListener("pointerdown", (event) => {
   if (event.button !== 0) {
+    return;
+  }
+  activeBoardPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (activeBoardPointers.size === 2) {
+    const [first, second] = [...activeBoardPointers.values()];
+    pinchState = {
+      distance: distanceBetweenPoints(first, second),
+      zoom: viewport.zoom,
+      anchor: midpointBetweenPoints(first, second),
+    };
+    dragState = null;
+    dom.boardWrapper.classList.remove("dragging");
+    return;
+  }
+  if (activeBoardPointers.size > 1) {
     return;
   }
   dragState = {
@@ -428,6 +445,19 @@ dom.boardWrapper.addEventListener("pointerdown", (event) => {
 });
 
 dom.boardWrapper.addEventListener("pointermove", (event) => {
+  if (activeBoardPointers.has(event.pointerId)) {
+    activeBoardPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  }
+  if (activeBoardPointers.size >= 2 && pinchState) {
+    const [first, second] = [...activeBoardPointers.values()];
+    const nextDistance = distanceBetweenPoints(first, second);
+    if (nextDistance > 0) {
+      const scale = nextDistance / pinchState.distance;
+      setZoom(pinchState.zoom * scale, pinchState.anchor);
+    }
+    event.preventDefault();
+    return;
+  }
   if (!dragState || dragState.pointerId !== event.pointerId) {
     return;
   }
@@ -446,12 +476,27 @@ dom.boardWrapper.addEventListener("pointermove", (event) => {
 });
 
 function stopDragging(event) {
+  activeBoardPointers.delete(event.pointerId);
+  if (activeBoardPointers.size < 2) {
+    pinchState = null;
+  }
   dragState = null;
   dom.boardWrapper.classList.remove("dragging");
 }
 
 dom.boardWrapper.addEventListener("pointerup", stopDragging);
 dom.boardWrapper.addEventListener("pointercancel", stopDragging);
+
+function distanceBetweenPoints(first, second) {
+  return Math.hypot(second.x - first.x, second.y - first.y);
+}
+
+function midpointBetweenPoints(first, second) {
+  return {
+    clientX: (first.x + second.x) / 2,
+    clientY: (first.y + second.y) / 2,
+  };
+}
 
 bindBoardInteraction(store, dom, renderApp);
 renderApp();
