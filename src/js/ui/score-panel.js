@@ -1,4 +1,5 @@
 import { getScoreSummary } from "../core/scoring.js";
+import { t } from "../core/i18n.js";
 
 export function renderScorePanel(dom, state) {
   const summary = getScoreSummary(state);
@@ -13,11 +14,11 @@ export function renderScorePanel(dom, state) {
             </h3>
           </header>
           <div class="score-metrics">
-            <span class="score-label">Owned hexes</span>
+            <span class="score-label">${t("score.ownedHexes")}</span>
             <strong class="score-value">${entry.owned}</strong>
-            <span class="score-label">Captured Hex Bonus</span>
+            <span class="score-label">${t("score.capturedBonus")}</span>
             <strong class="score-value">${entry.captured}</strong>
-            <span class="score-label">Longest Line</span>
+            <span class="score-label">${t("score.longestLine")}</span>
             <strong class="score-value">${entry.longestLine}</strong>
           </div>
         </article>
@@ -29,11 +30,7 @@ export function renderScorePanel(dom, state) {
 function formatPlayerLabel(player) {
   const passSuffix = player.passedLastTurn ? " PASS" : "";
   if (player.controlType === "ai") {
-    return `${player.name} (AI - ${capitalize(player.difficulty ?? "medium")})${passSuffix}`;
+    return `${player.name} (${t("label.aiDifficulty", { difficulty: t(`difficulty.${player.difficulty ?? "medium"}`) })})${passSuffix ? ` ${t("label.pass")}` : ""}`;
   }
-  return `${player.name}${passSuffix}`;
-}
-
-function capitalize(value) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+  return `${player.name}${passSuffix ? ` ${t("label.pass")}` : ""}`;
 }

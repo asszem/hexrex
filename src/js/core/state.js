@@ -1,4 +1,5 @@
 import { DEFAULT_GRID_SIZE, DEFAULT_RULES, createDefaultPlayers } from "./constants.js";
+import { t } from "./i18n.js";
 
 export function createInitialState(config = {}) {
   const players = (config.players ?? createDefaultPlayers(2)).map((player) => ({
@@ -18,7 +19,7 @@ export function createInitialState(config = {}) {
     gameOver: false,
     endgameDismissed: false,
     aiThinking: false,
-    status: "Hover a cell to preview the move.",
+    status: t("status.hoverPreview"),
     preview: null,
     hintCells: [],
   };

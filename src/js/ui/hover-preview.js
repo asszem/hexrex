@@ -1,4 +1,5 @@
 import { getPreviewForMode, placementCausesSelfCapture } from "../core/move-validation.js";
+import { t } from "../core/i18n.js";
 
 export function updatePreview(state, key) {
   const preview = getPreviewForMode(state, key);
@@ -6,7 +7,7 @@ export function updatePreview(state, key) {
     state.preview = {
       ...preview,
       valid: false,
-      reason: "This placement would immediately self-capture.",
+      reason: t("preview.selfCapture"),
     };
     return state.preview;
   }

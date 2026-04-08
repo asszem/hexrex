@@ -1,5 +1,5 @@
 import { createBoardCells } from "./board.js";
-import { createDefaultPlayers, PLAYER_PALETTE } from "./constants.js";
+import { createDefaultPlayers, PLAYER_PALETTE, getMaxPlayers } from "./constants.js";
 import { createInitialState } from "./state.js";
 import { resetGame } from "../io/new-game.js";
 import { clearAuto, loadAuto, loadQuick, saveQuick } from "../io/storage.js";
@@ -19,8 +19,10 @@ import { buildPlacementPreview } from "./placement-rules.js";
 import { buildRemovalPreview } from "./removal-rules.js";
 import { getAvailablePlacementKeys } from "./move-validation.js";
 import { hasAnyLegalPlacement } from "./scoring.js";
+import { initI18n, setLanguage, getLanguage, t } from "./i18n.js";
 
 const dom = getDomRefs();
+await initI18n();
 const autoLoadedState = loadAuto();
 const store = {
   state: autoLoadedState ?? createInitialState(),
@@ -81,14 +83,15 @@ function renderApp() {
     if (gameOver) {
       store.state.gameOver = true;
       store.state.winner = gameOver;
-      store.state.status = `${gameOver.winnerName} wins.`;
+      store.state.status = t("status.wins", { name: gameOver.winnerName });
     }
   }
   dom.board.setAttribute("viewBox", `0 0 ${boardCells.viewWidth} ${boardCells.viewHeight}`);
   dom.board.style.width = `${Math.round(viewport.baseBoardWidth * viewport.zoom)}px`;
   dom.boardWrapper.classList.toggle("ai-thinking", Boolean(store.state.aiThinking));
-  dom.zoomLevel.textContent = `Zoom ${Math.round(viewport.zoom * 100)}%`;
-  dom.hintButton.textContent = store.state.hintCells?.length ? "Hide" : "Hint";
+  applyStaticTranslations();
+  dom.zoomLevel.textContent = t("zoom.level", { percent: Math.round(viewport.zoom * 100) });
+  dom.hintButton.textContent = store.state.hintCells?.length ? t("button.hide") : t("button.hint");
   if (dom.passButton) {
     dom.passButton.disabled = store.state.gameOver || store.state.aiThinking;
   }
@@ -118,10 +121,58 @@ function openSetupModal() {
   dom.setupModal.showModal();
 }
 
+function applyStaticTranslations() {
+  document.title = t("app.title");
+  document.documentElement.lang = getLanguage();
+  dom.board.setAttribute("aria-label", t("app.boardAriaLabel"));
+  dom.langHuButton.setAttribute("aria-label", t("aria.langHungarian"));
+  dom.langEnButton.setAttribute("aria-label", t("aria.langEnglish"));
+  dom.langHuButton.closest(".language-switcher")?.setAttribute("aria-label", t("aria.languageSelector"));
+  dom.langHuButton.querySelector("img")?.setAttribute("alt", t("aria.flagHungarian"));
+  dom.langEnButton.querySelector("img")?.setAttribute("alt", t("aria.flagEnglish"));
+  dom.hintButton.textContent = store.state.hintCells?.length ? t("button.hide") : t("button.hint");
+  dom.passButton.textContent = t("button.pass");
+  dom.newGameButton.textContent = t("button.newGame");
+  dom.zoomResetButton.textContent = t("button.resetZoom");
+  dom.playerStatusLabel.textContent = t("panel.playerStatus");
+  dom.rulesLabel.textContent = t("panel.rules");
+  dom.matchResultLabel.textContent = t("panel.matchResult");
+  dom.endgameTitle.textContent = t("endgame.title");
+  dom.setupTitle.textContent = t("setup.title");
+  dom.setupGridSizeLabel.textContent = t("setup.gridSize");
+  dom.setupRulesLabel.textContent = t("setup.rules");
+  dom.setupPlayersLabel.textContent = t("setup.players");
+  dom.setupExtensionLabel.textContent = t("setup.extension");
+  dom.setupBorderProtectionLabel.textContent = t("setup.borderProtection");
+  dom.setupRemoveHexLabel.textContent = t("setup.removeHex");
+  dom.confirmAddPlayer.textContent = t("button.add");
+  dom.confirmNewGame.textContent = t("button.startGame");
+  dom.endgameModal.querySelector(".endgame-actions button").textContent = t("button.close");
+  dom.setupModal.querySelector(".setup-actions form button").textContent = t("button.cancel");
+  dom.setupModal.querySelectorAll(".setup-rule-option-on").forEach((node) => {
+    node.textContent = t("setup.toggle.on");
+  });
+  dom.setupModal.querySelectorAll(".setup-rule-option-off").forEach((node) => {
+    node.textContent = t("setup.toggle.off");
+  });
+  dom.langHuButton.classList.toggle("active", getLanguage() === "hu");
+  dom.langEnButton.classList.toggle("active", getLanguage() === "en");
+}
+
 dom.newGameButton.addEventListener("click", openSetupModal);
 if (dom.passButton) {
   dom.passButton.addEventListener("click", applyPassTurn);
 }
+dom.langHuButton.addEventListener("click", async () => {
+  await setLanguage("hu");
+  renderSetupModal(dom, setupDraft);
+  renderApp();
+});
+dom.langEnButton.addEventListener("click", async () => {
+  await setLanguage("en");
+  renderSetupModal(dom, setupDraft);
+  renderApp();
+});
 
 dom.hintButton.addEventListener("click", () => {
   if (store.state.hintCells?.length) {
@@ -132,8 +183,20 @@ dom.hintButton.addEventListener("click", () => {
   renderApp();
 });
 
+dom.setupGridSize.addEventListener("input", () => {
+  setupDraft.boardSize = normalizeBoardSize(dom.setupGridSize.value);
+  syncSetupPlayerLimit();
+  dom.setupGridSize.value = String(setupDraft.boardSize);
+  dom.setupGridSizeValue.textContent = t("setup.gridSizeValue", { size: setupDraft.boardSize });
+  renderSetupModal(dom, setupDraft);
+});
+
 dom.setupGridSize.addEventListener("change", () => {
-  setupDraft.boardSize = Number(dom.setupGridSize.value);
+  setupDraft.boardSize = normalizeBoardSize(dom.setupGridSize.value);
+  syncSetupPlayerLimit();
+  dom.setupGridSize.value = String(setupDraft.boardSize);
+  dom.setupGridSizeValue.textContent = t("setup.gridSizeValue", { size: setupDraft.boardSize });
+  renderSetupModal(dom, setupDraft);
 });
 
 dom.setupExtension.addEventListener("change", () => {
@@ -163,6 +226,22 @@ dom.setupPlayerList.addEventListener("input", (event) => {
   }
 });
 
+dom.setupPlayerList.addEventListener("focusin", (event) => {
+  const input = event.target.closest(".setup-player-input");
+  if (!input) {
+    return;
+  }
+  window.requestAnimationFrame(() => input.select());
+});
+
+dom.setupPlayerList.addEventListener("click", (event) => {
+  const input = event.target.closest(".setup-player-input");
+  if (!input) {
+    return;
+  }
+  input.select();
+});
+
 dom.setupPlayerList.addEventListener("change", (event) => {
   const mode = event.target.closest(".setup-player-mode");
   if (!mode) {
@@ -179,17 +258,33 @@ dom.setupPlayerList.addEventListener("change", (event) => {
   renderSetupModal(dom, setupDraft);
 });
 
-dom.confirmAddPlayer.addEventListener("click", () => {
-  const name = dom.newPlayerName.value.trim();
-  if (!name || setupDraft.players.length >= 6) {
+dom.setupPlayerList.addEventListener("click", (event) => {
+  const removeButton = event.target.closest(".setup-player-remove");
+  if (!removeButton) {
     return;
   }
+  const index = Number(removeButton.dataset.playerIndex);
+  const minPlayers = getMaxPlayers(setupDraft.boardSize) === 1 ? 1 : 2;
+  if (setupDraft.players.length <= minPlayers || Number.isNaN(index)) {
+    return;
+  }
+  setupDraft.players.splice(index, 1);
+  renderSetupModal(dom, setupDraft);
+});
+
+dom.confirmAddPlayer.addEventListener("click", () => {
+  const name = dom.newPlayerName.value.trim();
+  if (setupDraft.players.length >= getMaxPlayers(setupDraft.boardSize)) {
+    return;
+  }
+  const playerNumber = setupDraft.players.length + 1;
   const palette = PLAYER_PALETTE[setupDraft.players.length % PLAYER_PALETTE.length];
+  const previousPlayer = setupDraft.players.at(-1);
   setupDraft.players.push({
-    id: `player${setupDraft.players.length + 1}`,
-    name: name.slice(0, 10),
-    controlType: "human",
-    difficulty: "easy",
+    id: `player${playerNumber}`,
+    name: (name || t("player.defaultName", { number: playerNumber })).slice(0, 10),
+    controlType: previousPlayer?.controlType ?? "human",
+    difficulty: previousPlayer?.difficulty ?? "easy",
     ...palette,
   });
   dom.newPlayerName.value = "";
@@ -228,8 +323,8 @@ function applyPassTurn() {
     valid: true,
     cells: [],
     reason: hasAnyLegalPlacement(store.state, store.state.currentPlayer, buildPlacementPreview)
-      ? `${player?.name ?? "Player"} passes.`
-      : `${player?.name ?? "Player"} has no legal placement and must pass.`,
+      ? t("status.playerPasses", { name: player?.name ?? t("status.currentPlayer") })
+      : t("status.playerMustPass", { name: player?.name ?? t("status.currentPlayer") }),
   });
   renderApp();
 }
@@ -244,8 +339,8 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "F5") {
     event.preventDefault();
     saveQuick(store.state);
-    store.state.status = "Quick save created.";
-    showToast(dom, "Quick save created.");
+    store.state.status = t("status.quickSaveCreated");
+    showToast(dom, t("status.quickSaveCreated"));
     renderApp();
     return;
   }
@@ -254,7 +349,7 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     const quickState = loadQuick();
     if (!quickState) {
-      store.state.status = "No quick save found.";
+      store.state.status = t("status.noQuickSave");
       renderApp();
       return;
     }
@@ -263,8 +358,8 @@ window.addEventListener("keydown", (event) => {
     boardCells = createBoardCells(store.state.boardSize);
     store.state.hintCells = [];
     dom.endgameModal.close();
-    store.state.status = "Quick save loaded.";
-    showToast(dom, "Quick save loaded.");
+    store.state.status = t("status.quickSaveLoaded");
+    showToast(dom, t("status.quickSaveLoaded"));
     renderApp();
     return;
   }
@@ -336,7 +431,7 @@ bindBoardInteraction(store, dom, renderApp);
 renderApp();
 
 if (autoLoadedState) {
-  showToast(dom, "Auto-save loaded.");
+  showToast(dom, t("status.autoSaveLoaded"));
 }
 
 window.render_game_to_text = function renderGameToText() {
@@ -383,7 +478,7 @@ function scheduleAiTurn() {
   store.state.preview = null;
   store.state.hoverKey = null;
   store.state.hintCells = [];
-  store.state.status = `${player.name} is thinking...`;
+  store.state.status = t("status.aiThinking", { name: player.name });
 
   aiTurnTimer = window.setTimeout(() => {
     const activePlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
@@ -405,18 +500,26 @@ function scheduleAiTurn() {
 
 function buildRuleLines(rules) {
   return [
-    "Place one action per turn.",
-    rules.extension
-      ? "If a move touches your existing line, it must continue that line by the same length on the opposite side."
-      : "One hex can be placed on any unoccupied cell.",
-    rules.borderProtection
-      ? "Reaching the border prevents capture."
-      : "Groups can be captured on the border.",
-    rules.removeHex
-      ? "Owned edge hexes may be removed."
-      : "Hexes can only be added.",
-    "A player may pass instead of moving.",
-    "If all players pass consecutively, the game ends.",
-    "Captured cells convert and score double.",
+    t("rules.placeOneAction"),
+    rules.extension ? t("rules.extension.on") : t("rules.extension.off"),
+    rules.borderProtection ? t("rules.borderProtection.on") : t("rules.borderProtection.off"),
+    rules.removeHex ? t("rules.removeHex.on") : t("rules.removeHex.off"),
+    t("rules.passAllowed"),
+    t("rules.allPassEnd"),
+    t("rules.capturedDouble"),
   ];
+}
+
+function normalizeBoardSize(value) {
+  const numeric = Number.parseInt(value, 10);
+  const clamped = Math.max(1, Math.min(99, Number.isNaN(numeric) ? 11 : numeric));
+  return clamped % 2 === 0 ? Math.min(99, clamped + 1) : clamped;
+}
+
+function syncSetupPlayerLimit() {
+  const maxPlayers = getMaxPlayers(setupDraft.boardSize);
+  if (setupDraft.players.length <= maxPlayers) {
+    return;
+  }
+  setupDraft.players = setupDraft.players.slice(0, maxPlayers);
 }

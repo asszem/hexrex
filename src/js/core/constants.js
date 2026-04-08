@@ -1,11 +1,12 @@
-export const DEFAULT_GRID_SIZE = 9;
-export const GRID_SIZE_OPTIONS = [3, 5, 7, 9, 11, 19];
+import { t } from "./i18n.js";
+
+export const DEFAULT_GRID_SIZE = 11;
 export const DEFAULT_RULES = {
   extension: true,
   borderProtection: true,
   removeHex: true,
 };
-export const MAX_PLAYERS = 6;
+export const MAX_PLAYERS = 10;
 export const BOARD_VIEW_WIDTH = 960;
 export const BOARD_VIEW_HEIGHT = 900;
 export const HEX_RADIUS = 52;
@@ -26,12 +27,19 @@ export function createDefaultPlayers(count = 2) {
     const palette = PLAYER_PALETTE[index % PLAYER_PALETTE.length];
     return {
       id: `player${index + 1}`,
-      name: `Player ${index + 1}`,
+      name: t("player.defaultName", { number: index + 1 }),
       controlType: index === 0 ? "human" : index === 1 ? "ai" : "human",
       difficulty: index === 1 ? "medium" : "easy",
       ...palette,
     };
   });
+}
+
+export function getMaxPlayers(boardSize) {
+  if (boardSize > 5) {
+    return MAX_PLAYERS;
+  }
+  return Math.max(1, boardSize * boardSize);
 }
 
 export function getPlayerMap(players) {

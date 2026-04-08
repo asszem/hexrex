@@ -1,3 +1,5 @@
+import { t } from "../core/i18n.js";
+
 export function renderStatusMessage(dom, state) {
   if (dom.statusMessage) {
     dom.statusMessage.textContent = state.status;
@@ -8,7 +10,7 @@ export function renderStatusMessage(dom, state) {
   }
 
   if (state.gameOver) {
-    dom.footerTurnInfo.textContent = `Game Over - ${state.status}`;
+    dom.footerTurnInfo.textContent = t("footer.gameOver", { status: state.status });
     return;
   }
 
@@ -19,16 +21,12 @@ export function renderStatusMessage(dom, state) {
 
 function formatPlayerLabel(player) {
   if (!player) {
-    return "Current Player";
+    return t("status.currentPlayer");
   }
   if (player.controlType === "ai") {
-    return `${player.name} (AI - ${capitalize(player.difficulty ?? "medium")})`;
+    return `${player.name} (${t("label.aiDifficulty", { difficulty: t(`difficulty.${player.difficulty ?? "medium"}`) })})`;
   }
   return player.name;
-}
-
-function capitalize(value) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 function escapeHtml(value) {

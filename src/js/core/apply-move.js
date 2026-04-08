@@ -5,6 +5,7 @@ import { buildPlacementPreview } from "./placement-rules.js";
 import { buildRemovalPreview } from "./removal-rules.js";
 import { resolveCaptureChains } from "../events/chain-resolution.js";
 import { saveAuto } from "../io/storage.js";
+import { t } from "./i18n.js";
 
 export function applyResolvedMove(state, preview) {
   if (!preview?.valid) {
@@ -29,7 +30,10 @@ export function applyResolvedMove(state, preview) {
     const converted = resolveCaptureChains(state, state.currentPlayer);
     state.status =
       converted > 0
-        ? `Captured ${converted} hex${converted > 1 ? "es" : ""}.`
+        ? t("status.capturedHexes", {
+            count: converted,
+            hexes: t(converted > 1 ? "word.hexes" : "word.hex"),
+          })
         : preview.reason;
     state.consecutivePasses = 0;
   } else if (preview.type === "pass") {
@@ -52,7 +56,7 @@ export function applyResolvedMove(state, preview) {
   if (gameOver) {
     state.gameOver = true;
     state.winner = gameOver;
-    state.status = `${gameOver.winnerName} wins.`;
+    state.status = t("status.wins", { name: gameOver.winnerName });
   }
   saveAuto(state);
   return true;

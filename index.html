@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,7 +30,15 @@
       <div class="header-center"></div>
       <div class="header-actions">
         <div class="board-actions">
-          <button id="new-game-button" type="button">Start New Game</button>
+          <button id="new-game-button" type="button">Új játék</button>
+        </div>
+        <div class="language-switcher" aria-label="Nyelvválasztó">
+          <button id="lang-hu" class="lang-button" type="button" aria-label="Magyar">
+            <img src="./src/assets/flags/hu.svg" alt="Magyar zászló" />
+          </button>
+          <button id="lang-en" class="lang-button" type="button" aria-label="Angol">
+            <img src="./src/assets/flags/gb.svg" alt="Brit zászló" />
+          </button>
         </div>
       </div>
     </header>
@@ -46,7 +54,7 @@
                 class="board-svg"
                 viewBox="0 0 960 900"
                 role="img"
-                aria-label="HexRex game board"
+                aria-label="Hexrex játéktábla"
               ></svg>
             </div>
           </div>
@@ -54,11 +62,11 @@
       </section>
       <aside class="sidebar">
         <section class="panel scoreboard">
-          <p class="panel-label">Player Status</p>
+          <p id="player-status-label" class="panel-label">Játékosok állása</p>
           <div id="score-panel"></div>
         </section>
         <section class="panel info-panel">
-          <p class="panel-label">Rules</p>
+          <p id="rules-label" class="panel-label">Szabályok</p>
           <ul id="rule-list" class="info-list">
             <li>Place one action per turn.</li>
             <li>Captured cells convert and score double.</li>
@@ -69,85 +77,89 @@
     </main>
 
     <footer class="site-footer">
-      <p id="footer-turn-info">Player 1 - Hover a cell to preview the move.</p>
+      <p id="footer-turn-info">1. játékos - Húzd a kurzort egy mező fölé az előnézethez.</p>
       <div class="footer-zoom">
-        <p id="zoom-level">Zoom 100%</p>
-        <button id="zoom-reset-button" type="button">Reset</button>
+        <p id="zoom-level">Nagyítás 100%</p>
+        <button id="zoom-reset-button" type="button">Visszaállítás</button>
       </div>
     </footer>
 
     <dialog id="endgame-modal" class="endgame-modal">
       <article class="modal-card endgame-card">
         <header class="endgame-header">
-          <p class="panel-label">Match Result</p>
-          <h2>Game Over</h2>
+          <p id="match-result-label" class="panel-label">Meccs eredménye</p>
+          <h2 id="endgame-title">Játék vége</h2>
         </header>
         <div id="endgame-summary"></div>
         <form method="dialog" class="endgame-actions">
-          <button type="submit">Close</button>
+          <button type="submit">Bezárás</button>
         </form>
       </article>
     </dialog>
 
     <dialog id="setup-modal" class="endgame-modal">
       <article class="modal-card setup-card">
-        <h2>Start New Game</h2>
+        <h2 id="setup-title">Új játék</h2>
         <label class="setup-field">
-          <span>Grid Size</span>
-          <select id="setup-grid-size"></select>
+          <span class="setup-grid-header">
+            <span id="setup-grid-size-label">Rácsméret</span>
+            <strong id="setup-grid-size-value">11 x 11</strong>
+          </span>
+          <input id="setup-grid-size" type="range" min="1" max="99" step="1" value="11" />
         </label>
         <section class="setup-field">
-          <span>Rules</span>
+          <span id="setup-rules-label">Szabályok</span>
           <article class="setup-rule-row">
             <div class="setup-rule-copy">
-              <strong>Extension</strong>
+              <strong id="setup-extension-label">Kiterjesztés</strong>
               <p id="setup-extension-desc"></p>
             </div>
             <label class="setup-rule-toggle">
               <input id="setup-extension" type="checkbox" />
-              <span class="setup-rule-option setup-rule-option-on">ON</span>
-              <span class="setup-rule-option setup-rule-option-off">OFF</span>
-              <span id="setup-extension-state" class="setup-rule-state-text">ON</span>
+              <span class="setup-rule-option setup-rule-option-on">BE</span>
+              <span class="setup-rule-option setup-rule-option-off">KI</span>
+              <span id="setup-extension-state" class="setup-rule-state-text">BE</span>
             </label>
           </article>
           <article class="setup-rule-row">
             <div class="setup-rule-copy">
-              <strong>Border Protection</strong>
+              <strong id="setup-border-protection-label">Védelem a szélen</strong>
               <p id="setup-border-protection-desc"></p>
             </div>
             <label class="setup-rule-toggle">
               <input id="setup-border-protection" type="checkbox" />
-              <span class="setup-rule-option setup-rule-option-on">ON</span>
-              <span class="setup-rule-option setup-rule-option-off">OFF</span>
-              <span id="setup-border-protection-state" class="setup-rule-state-text">ON</span>
+              <span class="setup-rule-option setup-rule-option-on">BE</span>
+              <span class="setup-rule-option setup-rule-option-off">KI</span>
+              <span id="setup-border-protection-state" class="setup-rule-state-text">BE</span>
             </label>
           </article>
           <article class="setup-rule-row">
             <div class="setup-rule-copy">
-              <strong>Remove Hex</strong>
+              <strong id="setup-remove-hex-label">Hexa eltávolítása</strong>
               <p id="setup-remove-hex-desc"></p>
             </div>
             <label class="setup-rule-toggle">
               <input id="setup-remove-hex" type="checkbox" />
-              <span class="setup-rule-option setup-rule-option-on">ON</span>
-              <span class="setup-rule-option setup-rule-option-off">OFF</span>
-              <span id="setup-remove-hex-state" class="setup-rule-state-text">ON</span>
+              <span class="setup-rule-option setup-rule-option-on">BE</span>
+              <span class="setup-rule-option setup-rule-option-off">KI</span>
+              <span id="setup-remove-hex-state" class="setup-rule-state-text">BE</span>
             </label>
           </article>
         </section>
         <section class="setup-field">
-          <span>Players</span>
+          <span id="setup-players-label">Játékosok</span>
           <div id="setup-player-list" class="setup-player-list"></div>
         </section>
         <div id="add-player-row" class="setup-add-row">
-          <input id="new-player-name" type="text" maxlength="10" placeholder="Enter player name" />
-          <button id="confirm-add-player" type="button">Add</button>
+          <span id="new-player-swatch" class="player-swatch"></span>
+          <input id="new-player-name" type="text" maxlength="10" size="10" placeholder="Játékos neve" />
+          <button id="confirm-add-player" type="button">Hozzáad</button>
         </div>
         <div class="setup-actions">
-          <button id="confirm-new-game" type="button">Start Game</button>
           <form method="dialog">
-            <button type="submit">Cancel</button>
+            <button type="submit">Mégse</button>
           </form>
+          <button id="confirm-new-game" type="button" class="primary-glow-button">Játék indítása</button>
         </div>
       </article>
     </dialog>

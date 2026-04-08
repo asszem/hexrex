@@ -1,9 +1,11 @@
+import { t } from "../core/i18n.js";
+
 export function renderTurnPanel(dom, state) {
   if (!dom.turnPlayer) {
     return;
   }
   if (state.gameOver) {
-    dom.turnPlayer.textContent = "Game Over";
+    dom.turnPlayer.textContent = t("status.gameOver");
     dom.turnPlayer.style.color = "";
     return;
   }
@@ -16,7 +18,7 @@ export function renderArenaTurnIndicator(dom, state) {
   if (state.gameOver) {
     dom.arenaTurnIndicator.innerHTML = `
       <article class="player-chip active arena-player-chip">
-        <span>Game Over</span>
+        <span>${t("status.gameOver")}</span>
       </article>
     `;
     return;
@@ -31,11 +33,7 @@ export function renderArenaTurnIndicator(dom, state) {
 
 function formatPlayerLabel(player) {
   if (player.controlType === "ai") {
-    return `${player.name} (AI - ${capitalize(player.difficulty ?? "medium")})`;
+    return `${player.name} (${t("label.aiDifficulty", { difficulty: t(`difficulty.${player.difficulty ?? "medium"}`) })})`;
   }
   return player.name;
-}
-
-function capitalize(value) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
 }

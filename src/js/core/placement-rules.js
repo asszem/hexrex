@@ -1,10 +1,11 @@
 import { DIRECTIONS, OPPOSITE_DIRECTION } from "./constants.js";
 import { getCellState } from "./state.js";
 import { getNeighborKey, walkDirection } from "./board.js";
+import { t } from "./i18n.js";
 
 export function buildPlacementPreview(state, anchorKey) {
   if (getCellState(state, anchorKey)) {
-    return invalidPreview(anchorKey, "Cell is already occupied.");
+    return invalidPreview(anchorKey, t("preview.cellOccupied"));
   }
 
   if (!state.rules?.extension) {
@@ -12,7 +13,7 @@ export function buildPlacementPreview(state, anchorKey) {
       type: "place",
       valid: true,
       cells: [anchorKey],
-      reason: "Place 1 hex on any unoccupied cell.",
+      reason: t("preview.placeOneAnywhere"),
     };
   }
 
@@ -25,7 +26,7 @@ export function buildPlacementPreview(state, anchorKey) {
       type: "place",
       valid: true,
       cells: [anchorKey],
-      reason: "Disconnected placement creates a single-cell group.",
+      reason: t("preview.disconnectedSingle"),
     };
   }
 
@@ -42,13 +43,19 @@ export function buildPlacementPreview(state, anchorKey) {
     const placementCells = [anchorKey];
     const extension = walkDirection(anchorKey, outwardDirection, requiredCount - 1, state.boardSize);
     if (!extension) {
-      return invalidPreview(anchorKey, `Placement must also extend toward ${outwardDirection.key}.`);
+      return invalidPreview(
+        anchorKey,
+        t("preview.mustExtendToward", { direction: t(`direction.${outwardDirection.key}`) }),
+      );
     }
     placementCells.push(...extension);
 
     const blocked = placementCells.some((key) => getCellState(state, key));
     if (blocked) {
-      return invalidPreview(anchorKey, `Placement line toward ${outwardDirection.key} is blocked.`);
+      return invalidPreview(
+        anchorKey,
+        t("preview.lineBlocked", { direction: t(`direction.${outwardDirection.key}`) }),
+      );
     }
     for (const key of placementCells) {
       requiredCells.add(key);
@@ -60,7 +67,10 @@ export function buildPlacementPreview(state, anchorKey) {
     type: "place",
     valid: true,
     cells: mergedCells,
-    reason: `Place ${mergedCells.length} hex${mergedCells.length > 1 ? "es" : ""} to satisfy all touching lines.`,
+    reason: t("preview.placeToSatisfyLines", {
+      count: mergedCells.length,
+      hexes: t(mergedCells.length > 1 ? "word.hexes" : "word.hex"),
+    }),
   };
 }
 

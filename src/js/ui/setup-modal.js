@@ -1,4 +1,5 @@
-import { GRID_SIZE_OPTIONS, MAX_PLAYERS } from "../core/constants.js";
+import { PLAYER_PALETTE, getMaxPlayers } from "../core/constants.js";
+import { t } from "../core/i18n.js";
 
 export function createSetupDraft(state) {
   return {
@@ -9,24 +10,25 @@ export function createSetupDraft(state) {
 }
 
 export function renderSetupModal(dom, draft) {
-  dom.setupGridSize.innerHTML = GRID_SIZE_OPTIONS.map(
-    (size) => `<option value="${size}" ${size === draft.boardSize ? "selected" : ""}>${size} x ${size}</option>`,
-  ).join("");
+  const maxPlayers = getMaxPlayers(draft.boardSize);
+  const minPlayers = maxPlayers === 1 ? 1 : 2;
+  dom.setupGridSize.value = String(draft.boardSize);
+  dom.setupGridSizeValue.textContent = t("setup.gridSizeValue", { size: draft.boardSize });
   dom.setupExtension.checked = Boolean(draft.rules.extension);
   dom.setupBorderProtection.checked = Boolean(draft.rules.borderProtection);
   dom.setupRemoveHex.checked = Boolean(draft.rules.removeHex);
-  dom.setupExtensionState.textContent = draft.rules.extension ? "ON" : "OFF";
-  dom.setupBorderProtectionState.textContent = draft.rules.borderProtection ? "ON" : "OFF";
-  dom.setupRemoveHexState.textContent = draft.rules.removeHex ? "ON" : "OFF";
+  dom.setupExtensionState.textContent = draft.rules.extension ? t("setup.toggle.on") : t("setup.toggle.off");
+  dom.setupBorderProtectionState.textContent = draft.rules.borderProtection ? t("setup.toggle.on") : t("setup.toggle.off");
+  dom.setupRemoveHexState.textContent = draft.rules.removeHex ? t("setup.toggle.on") : t("setup.toggle.off");
   dom.setupExtensionDesc.textContent = draft.rules.extension
-    ? "If the target touches one of your lines, the move must continue that line by the same length on the opposite side."
-    : "Each move places exactly one hex on any unoccupied cell.";
+    ? t("setup.rule.extension.on")
+    : t("setup.rule.extension.off");
   dom.setupBorderProtectionDesc.textContent = draft.rules.borderProtection
-    ? "Groups touching the border are protected from capture."
-    : "Groups can be captured even against the border.";
+    ? t("setup.rule.borderProtection.on")
+    : t("setup.rule.borderProtection.off");
   dom.setupRemoveHexDesc.textContent = draft.rules.removeHex
-    ? "Players may remove owned edge hexes."
-    : "Hexes cannot be removed after placement.";
+    ? t("setup.rule.removeHex.on")
+    : t("setup.rule.removeHex.off");
 
   dom.setupPlayerList.innerHTML = draft.players
     .map(
@@ -40,20 +42,47 @@ export function renderSetupModal(dom, draft) {
             maxlength="10"
             value="${escapeAttribute(player.name)}"
           />
-          <select class="setup-player-mode" data-player-index="${index}">
-            <option value="human" ${player.controlType !== "ai" ? "selected" : ""}>Human</option>
-            <option value="hard" ${player.controlType === "ai" && player.difficulty === "hard" ? "selected" : ""}>Strong AI</option>
-            <option value="medium" ${player.controlType === "ai" && player.difficulty === "medium" ? "selected" : ""}>Medium AI</option>
-            <option value="easy" ${player.controlType === "ai" && player.difficulty === "easy" ? "selected" : ""}>Weak AI</option>
-          </select>
+          <div class="setup-player-mode-group" data-player-index="${index}">
+            ${renderModeOption(index, "human", player.controlType !== "ai", t("setup.mode.human"))}
+            ${renderModeOption(index, "easy", player.controlType === "ai" && player.difficulty === "easy", t("setup.mode.aiWeak"))}
+            ${renderModeOption(index, "medium", player.controlType === "ai" && player.difficulty === "medium", t("setup.mode.aiMedium"))}
+            ${renderModeOption(index, "hard", player.controlType === "ai" && player.difficulty === "hard", t("setup.mode.aiStrong"))}
+          </div>
+          <button
+            class="setup-player-remove"
+            data-player-index="${index}"
+            type="button"
+            aria-label="${t("button.removePlayer")}"
+            ${draft.players.length <= minPlayers ? "disabled" : ""}
+          >×</button>
         </article>
       `,
     )
     .join("");
-  dom.confirmAddPlayer.disabled = draft.players.length >= MAX_PLAYERS;
-  dom.newPlayerName.disabled = draft.players.length >= MAX_PLAYERS;
+  dom.confirmAddPlayer.disabled = draft.players.length >= maxPlayers;
+  dom.newPlayerName.disabled = draft.players.length >= maxPlayers;
+  dom.newPlayerName.placeholder = t("setup.placeholder.playerName");
+  const nextPalette = PLAYER_PALETTE[draft.players.length % PLAYER_PALETTE.length];
+  dom.newPlayerSwatch.style.background = nextPalette.fill;
+  dom.newPlayerSwatch.style.opacity = draft.players.length >= maxPlayers ? "0.38" : "1";
 }
 
 function escapeAttribute(value) {
   return value.replaceAll("&", "&amp;").replaceAll("\"", "&quot;").replaceAll("<", "&lt;");
+}
+
+function renderModeOption(index, value, checked, label) {
+  return `
+    <label class="setup-player-mode-option ${checked ? "active" : ""}">
+      <input
+        class="setup-player-mode"
+        data-player-index="${index}"
+        type="radio"
+        name="setup-player-mode-${index}"
+        value="${value}"
+        ${checked ? "checked" : ""}
+      />
+      <span>${label}</span>
+    </label>
+  `;
 }

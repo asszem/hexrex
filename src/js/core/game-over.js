@@ -1,4 +1,5 @@
 import { getScoreSummary } from "./scoring.js";
+import { t } from "./i18n.js";
 
 export function evaluateGameOver(state, placementFn, removalFn) {
   if ((state.consecutivePasses ?? 0) < state.players.length) {
@@ -13,7 +14,9 @@ export function evaluateGameOver(state, placementFn, removalFn) {
 
   return {
     winnerId,
-    winnerName: winnerId ? state.players.find((player) => player.id === winnerId)?.name ?? "Winner" : "Tie",
+    winnerName: winnerId
+      ? state.players.find((player) => player.id === winnerId)?.name ?? t("word.winner")
+      : t("word.tie"),
     scores,
   };
 }

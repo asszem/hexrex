@@ -1,24 +1,25 @@
 import { getNeighbors } from "./board.js";
 import { cloneState, getCellState, setCellState } from "./state.js";
+import { t } from "./i18n.js";
 
 export function buildRemovalPreview(state, key) {
   if (!state.rules?.removeHex) {
-    return invalidRemoval(key, "Remove Hex is disabled.");
+    return invalidRemoval(key, t("preview.removeDisabled"));
   }
 
   const cell = getCellState(state, key);
   if (!cell || cell.owner !== state.currentPlayer) {
-    return invalidRemoval(key, "You can only remove your own hex.");
+    return invalidRemoval(key, t("preview.removeOwnOnly"));
   }
 
   const groupKeys = collectGroup(state, key, state.currentPlayer);
   if (groupKeys.length === 1) {
-    return invalidRemoval(key, "A one-hex group cannot be removed to zero.");
+    return invalidRemoval(key, t("preview.removeSingleGroup"));
   }
 
   const touchesEmpty = getNeighbors(key, state.boardSize).some((neighborKey) => !getCellState(state, neighborKey));
   if (!touchesEmpty) {
-    return invalidRemoval(key, "Only edge hexes can be removed.");
+    return invalidRemoval(key, t("preview.removeEdgeOnly"));
   }
 
   const simulated = cloneState(state);
@@ -26,14 +27,14 @@ export function buildRemovalPreview(state, key) {
   const remainingGroupStart = groupKeys.find((groupKey) => groupKey !== key);
   const connectedAfterRemoval = collectGroup(simulated, remainingGroupStart, state.currentPlayer);
   if (connectedAfterRemoval.length !== groupKeys.length - 1) {
-    return invalidRemoval(key, "Removing this hex would split the group.");
+    return invalidRemoval(key, t("preview.removeSplitGroup"));
   }
 
   return {
     type: "remove",
     valid: true,
     cells: [key],
-    reason: cell.captured ? "Remove captured hex and lose its double value." : "Remove edge hex.",
+    reason: cell.captured ? t("preview.removeCaptured") : t("preview.removeEdge"),
   };
 }
 

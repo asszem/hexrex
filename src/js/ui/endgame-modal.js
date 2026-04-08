@@ -1,3 +1,5 @@
+import { t } from "../core/i18n.js";
+
 export function renderEndgame(dom, result, state) {
   dom.endgameSummary.innerHTML = Object.entries(result.scores)
     .map(
@@ -6,15 +8,15 @@ export function renderEndgame(dom, result, state) {
           <h3>${state.players.find((player) => player.id === playerId)?.name ?? playerId}</h3>
           <dl class="summary-metrics">
             <div>
-              <dt>Score</dt>
+              <dt>${t("endgame.score")}</dt>
               <dd>${entry.score}</dd>
             </div>
             <div>
-              <dt>Captured</dt>
+              <dt>${t("endgame.captured")}</dt>
               <dd>${entry.captured}</dd>
             </div>
             <div>
-              <dt>Longest line</dt>
+              <dt>${t("endgame.longestLine")}</dt>
               <dd>${entry.longestLine}</dd>
             </div>
           </dl>
@@ -25,7 +27,7 @@ export function renderEndgame(dom, result, state) {
 
   const heading = document.createElement("p");
   heading.className = "winner-line";
-  heading.textContent = `Winner: ${result.winnerName}`;
+  heading.textContent = t("endgame.winner", { name: result.winnerName });
   dom.endgameSummary.prepend(heading);
   if (!dom.endgameModal.open) {
     dom.endgameModal.showModal();

@@ -15,3 +15,23 @@ button:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 26px rgba(48, 65, 82, 0.24);
 }
+
+.lang-button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lang-button img {
+  width: 22px;
+  height: 16px;
+  display: block;
+  border-radius: 2px;
+}
+
+.lang-button.active {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18), 0 12px 26px rgba(48, 65, 82, 0.24);
+}

@@ -2,13 +2,14 @@ import { popHistorySnapshot } from "../core/state.js";
 import { updatePreview } from "./hover-preview.js";
 import { clearPreview } from "./selection-state.js";
 import { applyResolvedMove } from "../core/apply-move.js";
+import { t } from "../core/i18n.js";
 
 export function bindBoardInteraction(store, dom, renderApp) {
   let pendingTap = null;
 
   function undoLastMove() {
     const undone = popHistorySnapshot(store.state);
-    store.state.status = undone ? "Last move undone." : "No move to undo.";
+    store.state.status = undone ? t("status.lastMoveUndone") : t("status.noMoveToUndo");
     renderApp();
   }
 
@@ -32,7 +33,7 @@ export function bindBoardInteraction(store, dom, renderApp) {
     store.state.hoverKey = null;
     clearPreview(store.state);
     if (!store.state.aiThinking) {
-      store.state.status = "Hover a cell to preview the move.";
+      store.state.status = t("status.hoverPreview");
     }
     renderApp();
   });

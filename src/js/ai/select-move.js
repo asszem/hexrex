@@ -4,11 +4,12 @@ import { buildRemovalPreview } from "../core/removal-rules.js";
 import { placementCausesSelfCapture } from "../core/move-validation.js";
 import { getScoreSummary, hasAnyLegalPlacement } from "../core/scoring.js";
 import { applyResolvedMove } from "../core/apply-move.js";
+import { t } from "../core/i18n.js";
 
 export function chooseAiMove(state, player) {
   const moves = collectCandidateMoves(state);
   if (moves.length === 0 || !hasAnyLegalPlacement(state, player.id, buildPlacementPreview)) {
-    return buildPassMove(state, player, "No legal placement available. Passing.");
+    return buildPassMove(state, player, t("status.noLegalPlacementPassing"));
   }
 
   if (player.difficulty === "easy") {
@@ -21,7 +22,7 @@ export function chooseAiMove(state, player) {
   }));
   scoredMoves.sort((left, right) => right.score - left.score);
   if (shouldPass(player, scoredMoves[0]?.score ?? Number.NEGATIVE_INFINITY)) {
-    return buildPassMove(state, player, `${player.name} passes.`);
+    return buildPassMove(state, player, t("status.playerPasses", { name: player.name }));
   }
   return scoredMoves[0].move;
 }
