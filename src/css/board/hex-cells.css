@@ -2,21 +2,29 @@
   fill: url(#neutral-hex-gradient);
   stroke: var(--hex-neutral-stroke);
   stroke-width: 2;
+  filter: drop-shadow(0 1px 0 rgba(255, 242, 218, 0.08));
   transition: fill 120ms ease, transform 120ms ease, filter 120ms ease, stroke 120ms ease;
 }
 
 .hex-cell:hover {
-  stroke: rgba(255, 248, 229, 0.52);
+  stroke: rgba(255, 248, 229, 0.42);
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 242, 218, 0.12))
+    drop-shadow(0 0 10px rgba(255, 229, 176, 0.12));
 }
 
 .hex-cell.occupied.playerA {
   fill: url(#player-a-gradient);
-  filter: drop-shadow(0 0 8px rgba(103, 199, 255, 0.22));
+  filter:
+    drop-shadow(0 0 10px rgba(103, 199, 255, 0.24))
+    drop-shadow(0 0 22px rgba(53, 112, 197, 0.14));
 }
 
 .hex-cell.occupied.playerB {
   fill: url(#player-b-gradient);
-  filter: drop-shadow(0 0 8px rgba(141, 227, 196, 0.2));
+  filter:
+    drop-shadow(0 0 10px rgba(141, 227, 196, 0.24))
+    drop-shadow(0 0 22px rgba(63, 129, 87, 0.14));
 }
 
 .cell-label {

@@ -1,59 +1,56 @@
 .scoreboard {
   display: grid;
-  gap: 8px;
+  gap: 14px;
 }
 
 .score-row {
-  padding: 10px 11px;
-  border-radius: 14px;
-  background: rgba(255, 244, 220, 0.08);
-  border: 1px solid rgba(255, 233, 188, 0.08);
+  margin-top: 2px;
+  padding: 7px 9px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 244, 220, 0.08), rgba(255, 244, 220, 0.04));
+  border: 1px solid rgba(255, 233, 188, 0.06);
   display: grid;
-  gap: 8px;
+  gap: 5px;
+}
+
+.score-row + .score-row {
+  margin-top: 6px;
 }
 
 .score-row-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .score-row-header h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
+  line-height: 1.1;
 }
 
-.score-player-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  box-shadow: 0 0 10px currentColor;
-}
-
-.score-total {
-  min-width: 2ch;
-  text-align: right;
-  font-size: 1.25rem;
-  color: #fff3d5;
+.score-player-name {
+  min-width: 0;
+  display: inline-block;
 }
 
 .score-metrics {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 4px 10px;
+  gap: 1px 8px;
   align-items: center;
 }
 
 .score-label {
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(247, 233, 203, 0.68);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: rgba(247, 233, 203, 0.62);
 }
 
 .score-value {
   min-width: 2ch;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  font-size: 0.92rem;
 }

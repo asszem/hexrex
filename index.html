@@ -52,18 +52,12 @@
         </section>
       </section>
       <aside class="sidebar">
-        <section class="panel turn-panel">
-          <p class="panel-label">Current Turn</p>
-          <h2 id="turn-player">Player 1</h2>
-          <p id="status-message">Hover a cell to preview the move.</p>
-        </section>
         <section class="panel scoreboard">
           <p class="panel-label">Player Status</p>
           <div id="score-panel"></div>
         </section>
         <section class="panel info-panel">
           <p class="panel-label">Rule Snapshot</p>
-          <p id="rule-summary"></p>
           <ul id="rule-list" class="info-list">
             <li>Place one action per turn.</li>
             <li>Captured cells convert and score double.</li>
@@ -74,7 +68,7 @@
     </main>
 
     <footer class="site-footer">
-      <p>F5 quick-save, F9 quick-load, right-click hex to undo.</p>
+      <p id="footer-turn-info">Player 1 - Hover a cell to preview the move.</p>
       <div class="footer-zoom">
         <p id="zoom-level">Zoom 100%</p>
         <button id="zoom-reset-button" type="button">Reset</button>

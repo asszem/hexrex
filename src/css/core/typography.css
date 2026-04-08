@@ -9,6 +9,8 @@ h1 {
 
 .site-title {
   letter-spacing: 0.02em;
+  color: var(--chrome-ink);
+  text-shadow: 0 0 18px rgba(255, 244, 225, 0.08);
 }
 
 .eyebrow,

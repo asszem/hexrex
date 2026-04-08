@@ -31,7 +31,7 @@ export function getDomRefs() {
     toastRoot: document.getElementById("toast-root"),
     zoomLevel: document.getElementById("zoom-level"),
     zoomResetButton: document.getElementById("zoom-reset-button"),
-    ruleSummary: document.getElementById("rule-summary"),
+    footerTurnInfo: document.getElementById("footer-turn-info"),
     ruleList: document.getElementById("rule-list"),
   };
 }

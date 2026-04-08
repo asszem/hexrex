@@ -42,7 +42,7 @@ export function renderBoard(dom, boardCells, state) {
 
 function buildGradients(players) {
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-  defs.appendChild(buildGradient("neutral-hex-gradient", ["#cfc1ac", "#a99881"]));
+  defs.appendChild(buildGradient("neutral-hex-gradient", ["#d7cdbf", "#8f826f"]));
   for (const player of players) {
     defs.appendChild(buildGradient(`piece-${player.id}`, [player.gradientStart, player.fill]));
     defs.appendChild(buildGradient(`captured-${player.id}`, [player.captureStart, player.fill]));

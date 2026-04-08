@@ -70,7 +70,6 @@ function renderApp() {
   dom.board.style.width = `${Math.round(viewport.baseBoardWidth * viewport.zoom)}px`;
   dom.zoomLevel.textContent = `Zoom ${Math.round(viewport.zoom * 100)}%`;
   dom.hintButton.textContent = store.state.hintCells?.length ? "Hide" : "Hint";
-  dom.ruleSummary.textContent = `Rules: ${buildRuleSummary(store.state.rules)}`;
   dom.ruleList.innerHTML = buildRuleLines(store.state.rules).map((line) => `<li>${line}</li>`).join("");
   renderBoard(dom, boardCells, store.state);
   renderTurnPanel(dom, store.state);
@@ -336,14 +335,6 @@ function scheduleAiTurn() {
     store.state.hintCells = [];
     renderApp();
   }, 260);
-}
-
-function buildRuleSummary(rules) {
-  const enabled = [];
-  if (rules.extension) enabled.push("Extension");
-  if (rules.borderProtection) enabled.push("Border Protection");
-  if (rules.removeHex) enabled.push("Remove Hex");
-  return enabled.length ? enabled.join(", ") : "None";
 }
 
 function buildRuleLines(rules) {
