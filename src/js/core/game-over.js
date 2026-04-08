@@ -7,12 +7,13 @@ export function getForcedPassReason(state, playerId = state.currentPlayer) {
     return null;
   }
 
-  if (!playerOwnsAnyHex(state, playerId)) {
+  if (state.cells.size > 0 && player.hasEnteredBoard && !playerOwnsAnyHex(state, playerId)) {
     return t("status.playerNoHexesMustPass", { name: player.name });
   }
 
   const activePlayers = state.players.filter((entry) => !entry.passedLastTurn);
-  if (activePlayers.length === 1 && activePlayers[0].id === playerId && state.players.length > 1) {
+  const passedPlayers = state.players.length - activePlayers.length;
+  if (passedPlayers > 0 && activePlayers.length === 1 && activePlayers[0].id === playerId && state.players.length > 1) {
     return t("status.lastRemainingMustPass", { name: player.name });
   }
 

@@ -4,7 +4,8 @@ import { t } from "./i18n.js";
 export function createInitialState(config = {}) {
   const players = (config.players ?? createDefaultPlayers(2)).map((player) => ({
     ...player,
-    passedLastTurn: Boolean(player.passedLastTurn),
+    passedLastTurn: false,
+    hasEnteredBoard: false,
   }));
   return {
     currentPlayer: players[0].id,

@@ -19,6 +19,7 @@ export function applyResolvedMove(state, preview, options = {}) {
   if (preview.type === "place") {
     if (activePlayer) {
       activePlayer.passedLastTurn = false;
+      activePlayer.hasEnteredBoard = true;
     }
     for (const key of preview.cells) {
       setCellState(state, key, {

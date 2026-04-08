@@ -5,7 +5,11 @@ export function createSetupDraft(state) {
   return {
     boardSize: state.boardSize,
     rules: { ...state.rules },
-    players: state.players.map((player) => ({ ...player })),
+    players: state.players.map((player) => ({
+      ...player,
+      passedLastTurn: false,
+      hasEnteredBoard: false,
+    })),
   };
 }
 

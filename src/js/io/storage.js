@@ -35,7 +35,11 @@ export function deserializeState(payload) {
   const players = parsed.players ?? createDefaultPlayers(2);
   return {
     currentPlayer: parsed.currentPlayer,
-    players,
+    players: players.map((player) => ({
+      ...player,
+      passedLastTurn: Boolean(player.passedLastTurn),
+      hasEnteredBoard: Boolean(player.hasEnteredBoard),
+    })),
     boardSize: parsed.boardSize ?? DEFAULT_GRID_SIZE,
     rules: { ...DEFAULT_RULES, ...(parsed.rules ?? {}) },
     mode: parsed.mode,
