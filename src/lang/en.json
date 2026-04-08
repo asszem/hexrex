@@ -25,6 +25,7 @@
   "setup.title": "Start New Game",
   "setup.gridSize": "Grid Size",
   "setup.gridSizeValue": "{size} x {size}",
+  "setup.gridSizeCustom": "Custom",
   "setup.rules": "Rules",
   "setup.players": "Players",
   "setup.extension": "Extension",

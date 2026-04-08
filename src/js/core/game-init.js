@@ -83,6 +83,9 @@ function applyZoomPresentation() {
   if (dom.zoomLevelMobile) {
     dom.zoomLevelMobile.textContent = zoomText;
   }
+  if (dom.zoomResetButtonMobile) {
+    dom.zoomResetButtonMobile.textContent = zoomText;
+  }
 }
 
 function scheduleZoomUpdate(nextZoom, anchor) {
@@ -200,15 +203,17 @@ function applyStaticTranslations() {
   dom.newGameButton.textContent = t("button.newGame");
   dom.newGameButtonMobile && (dom.newGameButtonMobile.textContent = t("button.newGame"));
   dom.zoomResetButton.textContent = t("button.resetZoom");
-  if (dom.zoomResetButtonMobile) {
-    dom.zoomResetButtonMobile.textContent = t("button.resetZoom");
-  }
+  dom.zoomResetButtonMobile?.setAttribute("aria-label", t("button.resetZoom"));
   dom.playerStatusLabel.textContent = t("panel.playerStatus");
   dom.rulesLabel.textContent = t("panel.rules");
   dom.matchResultLabel.textContent = t("panel.matchResult");
   dom.endgameTitle.textContent = t("endgame.title");
   dom.setupTitle.textContent = t("setup.title");
   dom.setupGridSizeLabel.textContent = t("setup.gridSize");
+  const customGridOption = dom.setupGridPreset.querySelector('option[value="custom"]');
+  if (customGridOption) {
+    customGridOption.textContent = t("setup.gridSizeCustom");
+  }
   dom.setupRulesLabel.textContent = t("setup.rules");
   dom.setupPlayersLabel.textContent = t("setup.players");
   dom.setupExtensionLabel.textContent = t("setup.extension");
@@ -268,17 +273,29 @@ dom.hintButton.addEventListener("click", () => {
 });
 
 dom.setupGridSize.addEventListener("input", () => {
-  setupDraft.boardSize = normalizeBoardSize(dom.setupGridSize.value);
+  setupDraft.boardSize = normalizeBoardSize(dom.setupGridSize.value, 15);
   syncSetupPlayerLimit();
+  dom.setupGridPreset.value = "custom";
   dom.setupGridSize.value = String(setupDraft.boardSize);
   dom.setupGridSizeValue.textContent = t("setup.gridSizeValue", { size: setupDraft.boardSize });
   renderSetupModal(dom, setupDraft);
 });
 
 dom.setupGridSize.addEventListener("change", () => {
-  setupDraft.boardSize = normalizeBoardSize(dom.setupGridSize.value);
+  setupDraft.boardSize = normalizeBoardSize(dom.setupGridSize.value, 15);
   syncSetupPlayerLimit();
+  dom.setupGridPreset.value = "custom";
   dom.setupGridSize.value = String(setupDraft.boardSize);
+  dom.setupGridSizeValue.textContent = t("setup.gridSizeValue", { size: setupDraft.boardSize });
+  renderSetupModal(dom, setupDraft);
+});
+
+dom.setupGridPreset.addEventListener("change", () => {
+  if (dom.setupGridPreset.value === "custom") {
+    return;
+  }
+  setupDraft.boardSize = normalizeBoardSize(dom.setupGridPreset.value, 5);
+  syncSetupPlayerLimit();
   dom.setupGridSizeValue.textContent = t("setup.gridSizeValue", { size: setupDraft.boardSize });
   renderSetupModal(dom, setupDraft);
 });
@@ -783,10 +800,13 @@ function buildRuleLines(rules) {
   ];
 }
 
-function normalizeBoardSize(value) {
+function normalizeBoardSize(value, minimum = 1) {
   const numeric = Number.parseInt(value, 10);
-  const clamped = Math.max(1, Math.min(99, Number.isNaN(numeric) ? 11 : numeric));
-  return clamped % 2 === 0 ? Math.min(99, clamped + 1) : clamped;
+  const clamped = Math.max(minimum, Math.min(100, Number.isNaN(numeric) ? 11 : numeric));
+  if (clamped % 2 === 0) {
+    return Math.min(99, clamped + 1);
+  }
+  return clamped;
 }
 
 function syncSetupPlayerLimit() {

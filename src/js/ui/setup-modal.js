@@ -16,7 +16,11 @@ export function createSetupDraft(state) {
 export function renderSetupModal(dom, draft) {
   const maxPlayers = getMaxPlayers(draft.boardSize);
   const minPlayers = maxPlayers === 1 ? 1 : 2;
+  dom.setupGridPreset.value = getPresetValue(draft.boardSize);
   dom.setupGridSize.value = String(draft.boardSize);
+  if (draft.boardSize < 15) {
+    dom.setupGridSize.value = "15";
+  }
   dom.setupGridSizeValue.textContent = t("setup.gridSizeValue", { size: draft.boardSize });
   dom.setupExtension.checked = Boolean(draft.rules.extension);
   dom.setupBorderProtection.checked = Boolean(draft.rules.borderProtection);
@@ -80,6 +84,13 @@ export function renderSetupModal(dom, draft) {
   const nextPalette = PLAYER_PALETTE[draft.players.length % PLAYER_PALETTE.length];
   dom.newPlayerSwatch.style.background = nextPalette.fill;
   dom.newPlayerSwatch.style.opacity = draft.players.length >= maxPlayers ? "0.38" : "1";
+}
+
+function getPresetValue(boardSize) {
+  if ([5, 9, 11, 15].includes(boardSize)) {
+    return String(boardSize);
+  }
+  return "custom";
 }
 
 function escapeAttribute(value) {

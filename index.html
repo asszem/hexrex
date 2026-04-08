@@ -124,7 +124,16 @@
             <span id="setup-grid-size-label">Rácsméret</span>
             <strong id="setup-grid-size-value">11 x 11</strong>
           </span>
-          <input id="setup-grid-size" type="range" min="1" max="99" step="1" value="11" />
+          <div class="setup-grid-controls">
+            <select id="setup-grid-preset">
+              <option value="5">5 x 5</option>
+              <option value="9">9 x 9</option>
+              <option value="11" selected>11 x 11</option>
+              <option value="15">15 x 15</option>
+              <option value="custom">Custom</option>
+            </select>
+            <input id="setup-grid-size" type="range" min="15" max="100" step="1" value="15" />
+          </div>
         </label>
         <section class="setup-field">
           <span id="setup-rules-label">Szabályok</span>

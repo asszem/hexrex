@@ -18,6 +18,7 @@ export function getDomRefs() {
     statusMessage: document.getElementById("status-message"),
     scorePanel: document.getElementById("score-panel"),
     setupModal: document.getElementById("setup-modal"),
+    setupGridPreset: document.getElementById("setup-grid-preset"),
     setupGridSize: document.getElementById("setup-grid-size"),
     setupExtension: document.getElementById("setup-extension"),
     setupExtensionState: document.getElementById("setup-extension-state"),

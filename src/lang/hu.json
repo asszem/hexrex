@@ -25,6 +25,7 @@
   "setup.title": "Új játék",
   "setup.gridSize": "Rácsméret",
   "setup.gridSizeValue": "{size} x {size}",
+  "setup.gridSizeCustom": "Egyedi",
   "setup.rules": "Szabályok",
   "setup.players": "Játékosok",
   "setup.extension": "Kiterjesztés",

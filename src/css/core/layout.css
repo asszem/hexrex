@@ -257,7 +257,8 @@ dialog {
     min-width: 0;
   }
 
-  .brand-block button,
+  .brand-block #hint-button,
+  .brand-block #pause-ai-button,
   .header-center {
     display: none;
   }
@@ -287,6 +288,19 @@ dialog {
 
   .mobile-only {
     display: flex;
+  }
+
+  .brand-block #pass-button {
+    display: inline-flex;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+
+  #zoom-level-mobile {
+    display: none;
   }
 
   .site-title {
