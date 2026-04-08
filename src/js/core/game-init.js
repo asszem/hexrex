@@ -31,6 +31,7 @@ let boardCells = createBoardCells(store.state.boardSize);
 let lastStartedSetup = createSetupDraft(autoLoadedState ?? createInitialState());
 let setupDraft = createSetupDraft(lastStartedSetup);
 let aiTurnTimer = null;
+let aiTurnToken = 0;
 const viewport = {
   zoom: 1,
   minZoom: 0.6,
@@ -462,6 +463,8 @@ function scheduleAiTurn() {
     window.clearTimeout(aiTurnTimer);
     aiTurnTimer = null;
   }
+  aiTurnToken += 1;
+  const currentToken = aiTurnToken;
 
   if (store.state.gameOver) {
     store.state.aiThinking = false;
@@ -480,14 +483,19 @@ function scheduleAiTurn() {
   store.state.hintCells = [];
   store.state.status = t("status.aiThinking", { name: player.name });
 
-  aiTurnTimer = window.setTimeout(() => {
+  aiTurnTimer = window.setTimeout(async () => {
     const activePlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
-    if (!activePlayer || activePlayer.controlType !== "ai" || store.state.gameOver) {
+    if (!activePlayer || activePlayer.controlType !== "ai" || store.state.gameOver || currentToken !== aiTurnToken) {
       store.state.aiThinking = false;
       return;
     }
-    const move = chooseAiMove(store.state, activePlayer);
-    if (!move) {
+    const move = await chooseAiMove(store.state, activePlayer);
+    if (!move || currentToken !== aiTurnToken) {
+      store.state.aiThinking = false;
+      return;
+    }
+    const latestPlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
+    if (!latestPlayer || latestPlayer.id !== activePlayer.id || store.state.gameOver) {
       store.state.aiThinking = false;
       return;
     }

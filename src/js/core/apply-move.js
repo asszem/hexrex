@@ -7,7 +7,7 @@ import { resolveCaptureChains } from "../events/chain-resolution.js";
 import { saveAuto } from "../io/storage.js";
 import { t } from "./i18n.js";
 
-export function applyResolvedMove(state, preview) {
+export function applyResolvedMove(state, preview, options = {}) {
   if (!preview?.valid) {
     return false;
   }
@@ -58,6 +58,8 @@ export function applyResolvedMove(state, preview) {
     state.winner = gameOver;
     state.status = t("status.wins", { name: gameOver.winnerName });
   }
-  saveAuto(state);
+  if (options.persist !== false) {
+    saveAuto(state);
+  }
   return true;
 }
