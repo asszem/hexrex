@@ -57,6 +57,12 @@ export function renderSetupModal(dom, draft) {
             ${renderModeOption(index, "medium", player.controlType === "ai" && player.difficulty === "medium", t("setup.mode.aiMedium"))}
             ${renderModeOption(index, "hard", player.controlType === "ai" && player.difficulty === "hard", t("setup.mode.aiStrong"))}
           </div>
+          <select class="setup-player-mode setup-player-mode-select" data-player-index="${index}">
+            <option value="human" ${player.controlType !== "ai" ? "selected" : ""}>${t("setup.mode.human")}</option>
+            <option value="easy" ${player.controlType === "ai" && player.difficulty === "easy" ? "selected" : ""}>${t("setup.mode.aiWeak")}</option>
+            <option value="medium" ${player.controlType === "ai" && player.difficulty === "medium" ? "selected" : ""}>${t("setup.mode.aiMedium")}</option>
+            <option value="hard" ${player.controlType === "ai" && player.difficulty === "hard" ? "selected" : ""}>${t("setup.mode.aiStrong")}</option>
+          </select>
           <button
             class="setup-player-remove"
             data-player-index="${index}"

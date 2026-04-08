@@ -137,6 +137,8 @@ body {
 .site-header,
 .site-footer,
 .sidebar,
+.app-shell,
+.board-stage,
 .panel,
 .setup-card,
 .endgame-card,
@@ -144,7 +146,7 @@ button,
 input,
 label,
 dialog {
-  touch-action: manipulation;
+  touch-action: pan-y manipulation;
 }
 
 .board-wrapper.dragging {

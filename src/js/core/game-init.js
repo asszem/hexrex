@@ -41,6 +41,16 @@ const viewport = {
   maxZoom: 1.8,
   baseBoardWidth: 760,
 };
+const MOBILE_PORTRAIT_MEDIA = window.matchMedia("(max-width: 820px) and (orientation: portrait)");
+
+function updateViewportConstraints() {
+  viewport.minZoom = MOBILE_PORTRAIT_MEDIA.matches ? 0.4 : 0.6;
+  if (viewport.zoom < viewport.minZoom) {
+    viewport.zoom = viewport.minZoom;
+  }
+}
+
+updateViewportConstraints();
 
 function setZoom(nextZoom, anchor) {
   const clampedZoom = Math.max(viewport.minZoom, Math.min(viewport.maxZoom, Number(nextZoom.toFixed(2))));
@@ -506,6 +516,11 @@ function midpointBetweenPoints(first, second) {
 
 bindBoardInteraction(store, dom, renderApp);
 renderApp();
+
+MOBILE_PORTRAIT_MEDIA.addEventListener("change", () => {
+  updateViewportConstraints();
+  renderApp();
+});
 
 if (autoLoadedState) {
   showToast(dom, t("status.autoSaveLoaded"));
