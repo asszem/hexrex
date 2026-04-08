@@ -4,6 +4,7 @@ body {
   color: var(--ink);
   display: grid;
   grid-template-rows: auto 1fr auto;
+  touch-action: manipulation;
 }
 
 .site-header,
@@ -131,6 +132,19 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(240, 243, 240, 0.06),
     inset 0 -24px 48px rgba(0, 0, 0, 0.1);
+}
+
+.site-header,
+.site-footer,
+.sidebar,
+.panel,
+.setup-card,
+.endgame-card,
+button,
+input,
+label,
+dialog {
+  touch-action: manipulation;
 }
 
 .board-wrapper.dragging {
