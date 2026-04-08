@@ -1,5 +1,5 @@
 export const DEFAULT_GRID_SIZE = 9;
-export const GRID_SIZE_OPTIONS = [3, 7, 9, 11, 19];
+export const GRID_SIZE_OPTIONS = [3, 5, 7, 9, 11, 19];
 export const DEFAULT_RULES = {
   extension: true,
   borderProtection: true,

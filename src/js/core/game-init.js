@@ -25,7 +25,8 @@ const store = {
   state: autoLoadedState ?? createInitialState(),
 };
 let boardCells = createBoardCells(store.state.boardSize);
-let setupDraft = createSetupDraft(store.state);
+let lastStartedSetup = createSetupDraft(autoLoadedState ?? createInitialState());
+let setupDraft = createSetupDraft(lastStartedSetup);
 let aiTurnTimer = null;
 const viewport = {
   zoom: 1,
@@ -52,6 +53,15 @@ function setZoom(nextZoom, anchor) {
 
   dom.boardWrapper.scrollLeft = contentX * viewport.zoom - (anchor ? anchor.clientX - wrapperRect.left : dom.boardWrapper.clientWidth / 2);
   dom.boardWrapper.scrollTop = contentY * viewport.zoom - (anchor ? anchor.clientY - wrapperRect.top : dom.boardWrapper.clientHeight / 2);
+}
+
+function centerBoardInArena() {
+  window.requestAnimationFrame(() => {
+    const maxLeft = Math.max(0, dom.boardWrapper.scrollWidth - dom.boardWrapper.clientWidth);
+    const maxTop = Math.max(0, dom.boardWrapper.scrollHeight - dom.boardWrapper.clientHeight);
+    dom.boardWrapper.scrollLeft = maxLeft / 2;
+    dom.boardWrapper.scrollTop = maxTop / 2;
+  });
 }
 
 function renderApp() {
@@ -88,7 +98,7 @@ function renderApp() {
 }
 
 function openSetupModal() {
-  setupDraft = createSetupDraft(store.state);
+  setupDraft = createSetupDraft(lastStartedSetup);
   renderSetupModal(dom, setupDraft);
   dom.newPlayerName.value = "";
   dom.setupModal.showModal();
@@ -173,6 +183,7 @@ dom.confirmAddPlayer.addEventListener("click", () => {
 });
 
 dom.confirmNewGame.addEventListener("click", () => {
+  lastStartedSetup = createSetupDraft(setupDraft);
   resetGame(store, {
     boardSize: setupDraft.boardSize,
     rules: { ...setupDraft.rules },
@@ -184,6 +195,7 @@ dom.confirmNewGame.addEventListener("click", () => {
   dom.endgameModal.close();
   dom.setupModal.close();
   renderApp();
+  centerBoardInArena();
 });
 
 window.addEventListener("keydown", (event) => {
@@ -211,6 +223,7 @@ window.addEventListener("keydown", (event) => {
       return;
     }
     store.state = quickState;
+    lastStartedSetup = createSetupDraft(quickState);
     boardCells = createBoardCells(store.state.boardSize);
     store.state.hintCells = [];
     dom.endgameModal.close();
@@ -341,14 +354,14 @@ function buildRuleLines(rules) {
   return [
     "Place one action per turn.",
     rules.extension
-      ? "Extension is ON: placement follows the extension rule."
-      : "Extension is OFF: one hex can be placed on any unoccupied cell.",
+      ? "If a move touches your existing line, it must continue that line by the same length on the opposite side."
+      : "One hex can be placed on any unoccupied cell.",
     rules.borderProtection
-      ? "Border Protection is ON: reaching the border prevents capture."
-      : "Border Protection is OFF: groups can be captured on the border.",
+      ? "Reaching the border prevents capture."
+      : "Groups can be captured on the border.",
     rules.removeHex
-      ? "Remove Hex is ON: owned edge hexes may be removed."
-      : "Remove Hex is OFF: hexes can only be added.",
+      ? "Owned edge hexes may be removed."
+      : "Hexes can only be added.",
     "Captured cells convert and score double.",
     "Game ends when the active player cannot place another hex.",
   ];

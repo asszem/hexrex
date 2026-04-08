@@ -19,7 +19,7 @@ export function renderSetupModal(dom, draft) {
   dom.setupBorderProtectionState.textContent = draft.rules.borderProtection ? "ON" : "OFF";
   dom.setupRemoveHexState.textContent = draft.rules.removeHex ? "ON" : "OFF";
   dom.setupExtensionDesc.textContent = draft.rules.extension
-    ? "A placed hex must extend from a touching line by the same length, so one move can add multiple connected hexes."
+    ? "If the target touches one of your lines, the move must continue that line by the same length on the opposite side."
     : "Each move places exactly one hex on any unoccupied cell.";
   dom.setupBorderProtectionDesc.textContent = draft.rules.borderProtection
     ? "Groups touching the border are protected from capture."
