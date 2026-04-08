@@ -30,6 +30,11 @@ export function renderBoard(dom, boardCells, state) {
       polygon.style.setProperty("--preview-stroke", state.preview.valid ? "#fff4cc" : "#5c0b10");
     }
 
+    if (state.hintCells?.includes(cell.id) && !marker) {
+      polygon.classList.add("hint-available");
+      polygon.style.setProperty("--hint-color", previewColor);
+    }
+
     group.appendChild(polygon);
     dom.board.appendChild(group);
   }

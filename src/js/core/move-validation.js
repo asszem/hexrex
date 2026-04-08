@@ -33,3 +33,17 @@ export function placementCausesSelfCapture(state, preview) {
       ),
     );
 }
+
+export function getAvailablePlacementKeys(state) {
+  const keys = [];
+  for (let row = 0; row < state.boardSize; row += 1) {
+    for (let col = 0; col < state.boardSize; col += 1) {
+      const key = `${col},${row}`;
+      const preview = buildPlacementPreview(state, key);
+      if (preview.valid && !placementCausesSelfCapture(state, preview)) {
+        keys.push(key);
+      }
+    }
+  }
+  return keys;
+}

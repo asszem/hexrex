@@ -14,6 +14,10 @@ import { showToast } from "../ui/toast.js";
 import { bindBoardInteraction } from "../ui/board-interaction.js";
 import { chooseAiMove } from "../ai/select-move.js";
 import { applyResolvedMove } from "./apply-move.js";
+import { evaluateGameOver } from "./game-over.js";
+import { buildPlacementPreview } from "./placement-rules.js";
+import { buildRemovalPreview } from "./removal-rules.js";
+import { getAvailablePlacementKeys } from "./move-validation.js";
 
 const dom = getDomRefs();
 const autoLoadedState = loadAuto();
@@ -54,9 +58,20 @@ function renderApp() {
   if (boardCells.length !== store.state.boardSize * store.state.boardSize) {
     boardCells = createBoardCells(store.state.boardSize);
   }
+  if (!store.state.gameOver) {
+    const gameOver = evaluateGameOver(store.state, buildPlacementPreview, buildRemovalPreview);
+    if (gameOver) {
+      store.state.gameOver = true;
+      store.state.winner = gameOver;
+      store.state.status = `${gameOver.winnerName} wins.`;
+    }
+  }
   dom.board.setAttribute("viewBox", `0 0 ${boardCells.viewWidth} ${boardCells.viewHeight}`);
   dom.board.style.width = `${Math.round(viewport.baseBoardWidth * viewport.zoom)}px`;
   dom.zoomLevel.textContent = `Zoom ${Math.round(viewport.zoom * 100)}%`;
+  dom.hintButton.textContent = store.state.hintCells?.length ? "Hide" : "Hint";
+  dom.ruleSummary.textContent = `Rules: ${buildRuleSummary(store.state.rules)}`;
+  dom.ruleList.innerHTML = buildRuleLines(store.state.rules).map((line) => `<li>${line}</li>`).join("");
   renderBoard(dom, boardCells, store.state);
   renderTurnPanel(dom, store.state);
   renderArenaTurnIndicator(dom, store.state);
@@ -82,8 +97,32 @@ function openSetupModal() {
 
 dom.newGameButton.addEventListener("click", openSetupModal);
 
+dom.hintButton.addEventListener("click", () => {
+  if (store.state.hintCells?.length) {
+    store.state.hintCells = [];
+  } else {
+    store.state.hintCells = getAvailablePlacementKeys(store.state);
+  }
+  renderApp();
+});
+
 dom.setupGridSize.addEventListener("change", () => {
   setupDraft.boardSize = Number(dom.setupGridSize.value);
+});
+
+dom.setupExtension.addEventListener("change", () => {
+  setupDraft.rules.extension = dom.setupExtension.checked;
+  renderSetupModal(dom, setupDraft);
+});
+
+dom.setupBorderProtection.addEventListener("change", () => {
+  setupDraft.rules.borderProtection = dom.setupBorderProtection.checked;
+  renderSetupModal(dom, setupDraft);
+});
+
+dom.setupRemoveHex.addEventListener("change", () => {
+  setupDraft.rules.removeHex = dom.setupRemoveHex.checked;
+  renderSetupModal(dom, setupDraft);
 });
 
 dom.setupPlayerList.addEventListener("input", (event) => {
@@ -137,9 +176,11 @@ dom.confirmAddPlayer.addEventListener("click", () => {
 dom.confirmNewGame.addEventListener("click", () => {
   resetGame(store, {
     boardSize: setupDraft.boardSize,
+    rules: { ...setupDraft.rules },
     players: setupDraft.players.map((player) => ({ ...player })),
   });
   boardCells = createBoardCells(store.state.boardSize);
+  store.state.hintCells = [];
   clearAuto();
   dom.endgameModal.close();
   dom.setupModal.close();
@@ -172,6 +213,7 @@ window.addEventListener("keydown", (event) => {
     }
     store.state = quickState;
     boardCells = createBoardCells(store.state.boardSize);
+    store.state.hintCells = [];
     dom.endgameModal.close();
     store.state.status = "Quick save loaded.";
     showToast(dom, "Quick save loaded.");
@@ -249,6 +291,7 @@ window.render_game_to_text = function renderGameToText() {
       currentPlayer: store.state.currentPlayer,
       players: store.state.players,
       boardSize: store.state.boardSize,
+      rules: store.state.rules,
       mode: store.state.mode,
       status: store.state.status,
       preview: store.state.preview,
@@ -290,6 +333,32 @@ function scheduleAiTurn() {
       return;
     }
     applyResolvedMove(store.state, move);
+    store.state.hintCells = [];
     renderApp();
   }, 260);
+}
+
+function buildRuleSummary(rules) {
+  const enabled = [];
+  if (rules.extension) enabled.push("Extension");
+  if (rules.borderProtection) enabled.push("Border Protection");
+  if (rules.removeHex) enabled.push("Remove Hex");
+  return enabled.length ? enabled.join(", ") : "None";
+}
+
+function buildRuleLines(rules) {
+  return [
+    "Place one action per turn.",
+    rules.extension
+      ? "Extension is ON: placement follows the extension rule."
+      : "Extension is OFF: one hex can be placed on any unoccupied cell.",
+    rules.borderProtection
+      ? "Border Protection is ON: reaching the border prevents capture."
+      : "Border Protection is OFF: groups can be captured on the border.",
+    rules.removeHex
+      ? "Remove Hex is ON: owned edge hexes may be removed."
+      : "Remove Hex is OFF: hexes can only be added.",
+    "Captured cells convert and score double.",
+    "Game ends when the active player cannot place another hex.",
+  ];
 }

@@ -7,6 +7,15 @@ export function buildPlacementPreview(state, anchorKey) {
     return invalidPreview(anchorKey, "Cell is already occupied.");
   }
 
+  if (!state.rules?.extension) {
+    return {
+      type: "place",
+      valid: true,
+      cells: [anchorKey],
+      reason: "Place 1 hex on any unoccupied cell.",
+    };
+  }
+
   const touchingOwnNeighbors = DIRECTIONS
     .map((direction) => ({ direction, key: getNeighborKey(anchorKey, direction, state.boardSize) }))
     .filter(({ key }) => key && getCellState(state, key)?.owner === state.currentPlayer);

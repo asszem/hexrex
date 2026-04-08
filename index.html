@@ -24,6 +24,7 @@
     <header class="site-header">
       <div class="brand-block">
         <h1 class="site-title">Hexrex</h1>
+        <button id="hint-button" type="button">Hint</button>
       </div>
       <div class="header-center"></div>
       <div class="header-actions">
@@ -62,11 +63,11 @@
         </section>
         <section class="panel info-panel">
           <p class="panel-label">Rule Snapshot</p>
-          <ul class="info-list">
-            <li>Place or remove once per turn.</li>
-            <li>Disconnected placements are single-cell only.</li>
+          <p id="rule-summary"></p>
+          <ul id="rule-list" class="info-list">
+            <li>Place one action per turn.</li>
             <li>Captured cells convert and score double.</li>
-            <li>Game ends when the active player has no legal move.</li>
+            <li>Game ends when the active player cannot place another hex.</li>
           </ul>
         </section>
       </aside>
@@ -97,6 +98,45 @@
           <span>Grid Size</span>
           <select id="setup-grid-size"></select>
         </label>
+        <section class="setup-field">
+          <span>Rules</span>
+          <article class="setup-rule-row">
+            <div class="setup-rule-copy">
+              <strong>Extension</strong>
+              <p id="setup-extension-desc"></p>
+            </div>
+            <label class="setup-rule-toggle">
+              <input id="setup-extension" type="checkbox" />
+              <span class="setup-rule-option setup-rule-option-on">ON</span>
+              <span class="setup-rule-option setup-rule-option-off">OFF</span>
+              <span id="setup-extension-state" class="setup-rule-state-text">ON</span>
+            </label>
+          </article>
+          <article class="setup-rule-row">
+            <div class="setup-rule-copy">
+              <strong>Border Protection</strong>
+              <p id="setup-border-protection-desc"></p>
+            </div>
+            <label class="setup-rule-toggle">
+              <input id="setup-border-protection" type="checkbox" />
+              <span class="setup-rule-option setup-rule-option-on">ON</span>
+              <span class="setup-rule-option setup-rule-option-off">OFF</span>
+              <span id="setup-border-protection-state" class="setup-rule-state-text">ON</span>
+            </label>
+          </article>
+          <article class="setup-rule-row">
+            <div class="setup-rule-copy">
+              <strong>Remove Hex</strong>
+              <p id="setup-remove-hex-desc"></p>
+            </div>
+            <label class="setup-rule-toggle">
+              <input id="setup-remove-hex" type="checkbox" />
+              <span class="setup-rule-option setup-rule-option-on">ON</span>
+              <span class="setup-rule-option setup-rule-option-off">OFF</span>
+              <span id="setup-remove-hex-state" class="setup-rule-state-text">ON</span>
+            </label>
+          </article>
+        </section>
         <section class="setup-field">
           <span>Players</span>
           <div id="setup-player-list" class="setup-player-list"></div>

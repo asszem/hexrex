@@ -68,10 +68,6 @@ export function hasAnyLegalMove(state, playerId, placementFn, removalFn) {
       if (placementFn({ ...state, currentPlayer: playerId }, key).valid) {
         return true;
       }
-      const cell = getCellState(state, key);
-      if (cell?.owner === playerId && removalFn({ ...state, currentPlayer: playerId }, key).valid) {
-        return true;
-      }
     }
   }
   return false;

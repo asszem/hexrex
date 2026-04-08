@@ -40,6 +40,10 @@ function collectOpponentGroups(state, actingPlayer) {
 }
 
 function isCapturedGroup(state, group) {
+  if (!state.rules?.borderProtection) {
+    return !groupTouchesEmpty(state, group);
+  }
+
   const groupSet = new Set(group);
   const queue = [];
   const visited = new Set();
@@ -70,4 +74,16 @@ function isCapturedGroup(state, group) {
   }
 
   return true;
+}
+
+function groupTouchesEmpty(state, group) {
+  const groupSet = new Set(group);
+  for (const key of group) {
+    for (const neighborKey of getNeighbors(key, state.boardSize)) {
+      if (!groupSet.has(neighborKey) && !getCellState(state, neighborKey)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

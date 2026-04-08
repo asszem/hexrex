@@ -2,6 +2,10 @@ import { getNeighbors } from "./board.js";
 import { cloneState, getCellState, setCellState } from "./state.js";
 
 export function buildRemovalPreview(state, key) {
+  if (!state.rules?.removeHex) {
+    return invalidRemoval(key, "Remove Hex is disabled.");
+  }
+
   const cell = getCellState(state, key);
   if (!cell || cell.owner !== state.currentPlayer) {
     return invalidRemoval(key, "You can only remove your own hex.");

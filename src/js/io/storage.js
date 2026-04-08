@@ -1,13 +1,14 @@
 const AUTO_SAVE_KEY = "hexrex:auto-save";
 const QUICK_SAVE_KEY = "hexrex:quick-save";
 
-import { DEFAULT_GRID_SIZE, createDefaultPlayers } from "../core/constants.js";
+import { DEFAULT_GRID_SIZE, DEFAULT_RULES, createDefaultPlayers } from "../core/constants.js";
 
 export function serializeState(state) {
   return JSON.stringify({
     currentPlayer: state.currentPlayer,
     players: state.players,
     boardSize: state.boardSize,
+    rules: state.rules,
     mode: state.mode,
     winner: state.winner,
     gameOver: state.gameOver,
@@ -28,6 +29,7 @@ export function deserializeState(payload) {
     currentPlayer: parsed.currentPlayer,
     players,
     boardSize: parsed.boardSize ?? DEFAULT_GRID_SIZE,
+    rules: { ...DEFAULT_RULES, ...(parsed.rules ?? {}) },
     mode: parsed.mode,
     winner: parsed.winner,
     gameOver: parsed.gameOver,

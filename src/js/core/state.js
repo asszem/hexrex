@@ -1,4 +1,4 @@
-import { DEFAULT_GRID_SIZE, createDefaultPlayers } from "./constants.js";
+import { DEFAULT_GRID_SIZE, DEFAULT_RULES, createDefaultPlayers } from "./constants.js";
 
 export function createInitialState(config = {}) {
   const players = config.players ?? createDefaultPlayers(2);
@@ -6,6 +6,7 @@ export function createInitialState(config = {}) {
     currentPlayer: players[0].id,
     players,
     boardSize: config.boardSize ?? DEFAULT_GRID_SIZE,
+    rules: { ...DEFAULT_RULES, ...(config.rules ?? {}) },
     mode: "place",
     cells: new Map(),
     history: [],
@@ -13,6 +14,7 @@ export function createInitialState(config = {}) {
     gameOver: false,
     status: "Hover a cell to preview the move.",
     preview: null,
+    hintCells: [],
   };
 }
 
@@ -40,6 +42,7 @@ export function cloneState(state) {
           cells: [...state.preview.cells],
         }
       : null,
+    hintCells: [...(state.hintCells ?? [])],
   };
 }
 
@@ -61,6 +64,7 @@ export function pushHistorySnapshot(state) {
     mode: state.mode,
     players: state.players.map((player) => ({ ...player })),
     boardSize: state.boardSize,
+    rules: { ...state.rules },
     cells: new Map(
       Array.from(state.cells.entries(), ([key, value]) => [
         key,
@@ -80,6 +84,7 @@ export function popHistorySnapshot(state) {
   state.mode = snapshot.mode;
   state.players = snapshot.players.map((player) => ({ ...player }));
   state.boardSize = snapshot.boardSize;
+  state.rules = { ...snapshot.rules };
   state.cells = new Map(
     Array.from(snapshot.cells.entries(), ([key, value]) => [
       key,
@@ -87,6 +92,7 @@ export function popHistorySnapshot(state) {
     ]),
   );
   state.preview = null;
+  state.hintCells = [];
   state.winner = null;
   state.gameOver = false;
   return true;

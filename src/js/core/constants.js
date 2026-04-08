@@ -1,5 +1,10 @@
 export const DEFAULT_GRID_SIZE = 9;
-export const GRID_SIZE_OPTIONS = [7, 9, 11, 19];
+export const GRID_SIZE_OPTIONS = [3, 7, 9, 11, 19];
+export const DEFAULT_RULES = {
+  extension: true,
+  borderProtection: true,
+  removeHex: true,
+};
 export const MAX_PLAYERS = 6;
 export const BOARD_VIEW_WIDTH = 960;
 export const BOARD_VIEW_HEIGHT = 900;

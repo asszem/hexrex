@@ -11,3 +11,9 @@
   stroke-width: 4;
   filter: none;
 }
+
+.hex-cell.hint-available {
+  stroke: color-mix(in srgb, var(--hint-color, #ffffff) 55%, #fff4cc 45%);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--hint-color, #ffffff) 40%, white 60%));
+}

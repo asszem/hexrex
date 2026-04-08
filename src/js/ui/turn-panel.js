@@ -1,10 +1,23 @@
 export function renderTurnPanel(dom, state) {
+  if (state.gameOver) {
+    dom.turnPlayer.textContent = "Game Over";
+    dom.turnPlayer.style.color = "";
+    return;
+  }
   const player = state.players.find((entry) => entry.id === state.currentPlayer);
   dom.turnPlayer.textContent = formatPlayerLabel(player);
   dom.turnPlayer.style.color = player.fill;
 }
 
 export function renderArenaTurnIndicator(dom, state) {
+  if (state.gameOver) {
+    dom.arenaTurnIndicator.innerHTML = `
+      <article class="player-chip active arena-player-chip">
+        <span>Game Over</span>
+      </article>
+    `;
+    return;
+  }
   const player = state.players.find((entry) => entry.id === state.currentPlayer);
   dom.arenaTurnIndicator.innerHTML = `
     <article class="player-chip active arena-player-chip">

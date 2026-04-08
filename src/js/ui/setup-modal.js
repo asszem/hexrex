@@ -3,6 +3,7 @@ import { GRID_SIZE_OPTIONS, MAX_PLAYERS } from "../core/constants.js";
 export function createSetupDraft(state) {
   return {
     boardSize: state.boardSize,
+    rules: { ...state.rules },
     players: state.players.map((player) => ({ ...player })),
   };
 }
@@ -11,6 +12,21 @@ export function renderSetupModal(dom, draft) {
   dom.setupGridSize.innerHTML = GRID_SIZE_OPTIONS.map(
     (size) => `<option value="${size}" ${size === draft.boardSize ? "selected" : ""}>${size} x ${size}</option>`,
   ).join("");
+  dom.setupExtension.checked = Boolean(draft.rules.extension);
+  dom.setupBorderProtection.checked = Boolean(draft.rules.borderProtection);
+  dom.setupRemoveHex.checked = Boolean(draft.rules.removeHex);
+  dom.setupExtensionState.textContent = draft.rules.extension ? "ON" : "OFF";
+  dom.setupBorderProtectionState.textContent = draft.rules.borderProtection ? "ON" : "OFF";
+  dom.setupRemoveHexState.textContent = draft.rules.removeHex ? "ON" : "OFF";
+  dom.setupExtensionDesc.textContent = draft.rules.extension
+    ? "A placed hex must extend from a touching line by the same length, so one move can add multiple connected hexes."
+    : "Each move places exactly one hex on any unoccupied cell.";
+  dom.setupBorderProtectionDesc.textContent = draft.rules.borderProtection
+    ? "Groups touching the border are protected from capture."
+    : "Groups can be captured even against the border.";
+  dom.setupRemoveHexDesc.textContent = draft.rules.removeHex
+    ? "Players may remove owned edge hexes."
+    : "Hexes cannot be removed after placement.";
 
   dom.setupPlayerList.innerHTML = draft.players
     .map(
