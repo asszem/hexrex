@@ -23,8 +23,8 @@ export function renderArenaTurnIndicator(dom, state) {
   }
   const player = state.players.find((entry) => entry.id === state.currentPlayer);
   dom.arenaTurnIndicator.innerHTML = `
-    <article class="player-chip active arena-player-chip">
-      <span style="color:${player.fill}">${formatPlayerLabel(player)}</span>
+    <article class="player-chip active arena-player-chip" style="background:${player.fill}; box-shadow: 0 0 18px ${player.glow}, inset 0 0 0 1px rgba(255,255,255,0.14);">
+      <span class="arena-player-label">${formatPlayerLabel(player)}</span>
     </article>
   `;
 }

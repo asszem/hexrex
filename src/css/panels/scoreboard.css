@@ -7,8 +7,8 @@
   margin-top: 2px;
   padding: 7px 9px;
   border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255, 244, 220, 0.08), rgba(255, 244, 220, 0.04));
-  border: 1px solid rgba(255, 233, 188, 0.06);
+  background: linear-gradient(180deg, rgba(241, 235, 225, 0.08), rgba(241, 235, 225, 0.04));
+  border: 1px solid rgba(236, 230, 218, 0.06);
   display: grid;
   gap: 5px;
 }
@@ -45,7 +45,7 @@
 .score-label {
   font-size: 0.72rem;
   letter-spacing: 0.05em;
-  color: rgba(247, 233, 203, 0.62);
+  color: rgba(241, 235, 225, 0.62);
 }
 
 .score-value {
