@@ -2,13 +2,13 @@ import { cloneState } from "../core/state.js";
 import { buildPlacementPreview } from "../core/placement-rules.js";
 import { buildRemovalPreview } from "../core/removal-rules.js";
 import { placementCausesSelfCapture } from "../core/move-validation.js";
-import { getScoreSummary } from "../core/scoring.js";
+import { getScoreSummary, hasAnyLegalPlacement } from "../core/scoring.js";
 import { applyResolvedMove } from "../core/apply-move.js";
 
 export function chooseAiMove(state, player) {
   const moves = collectCandidateMoves(state);
-  if (moves.length === 0) {
-    return null;
+  if (moves.length === 0 || !hasAnyLegalPlacement(state, player.id, buildPlacementPreview)) {
+    return buildPassMove(state, player, "No legal placement available. Passing.");
   }
 
   if (player.difficulty === "easy") {
@@ -20,6 +20,9 @@ export function chooseAiMove(state, player) {
     score: scoreMove(state, move, player),
   }));
   scoredMoves.sort((left, right) => right.score - left.score);
+  if (shouldPass(player, scoredMoves[0]?.score ?? Number.NEGATIVE_INFINITY)) {
+    return buildPassMove(state, player, `${player.name} passes.`);
+  }
   return scoredMoves[0].move;
 }
 
@@ -71,4 +74,24 @@ function scoreMove(state, move, player) {
     score += own.owned * 1.5;
   }
   return score;
+}
+
+function shouldPass(player, bestScore) {
+  if (player.difficulty === "medium") {
+    return bestScore < 6;
+  }
+  if (player.difficulty === "hard") {
+    return bestScore < 2;
+  }
+  return false;
+}
+
+function buildPassMove(state, player, reason) {
+  return {
+    type: "pass",
+    valid: true,
+    cells: [],
+    reason,
+    playerId: player.id ?? state.currentPlayer,
+  };
 }

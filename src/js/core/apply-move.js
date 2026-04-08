@@ -12,6 +12,7 @@ export function applyResolvedMove(state, preview) {
   }
 
   pushHistorySnapshot(state);
+  state.endgameDismissed = false;
 
   if (preview.type === "place") {
     for (const key of preview.cells) {
@@ -26,9 +27,14 @@ export function applyResolvedMove(state, preview) {
       converted > 0
         ? `Captured ${converted} hex${converted > 1 ? "es" : ""}.`
         : preview.reason;
+    state.consecutivePasses = 0;
+  } else if (preview.type === "pass") {
+    state.status = preview.reason;
+    state.consecutivePasses = (state.consecutivePasses ?? 0) + 1;
   } else {
     setCellState(state, preview.cells[0], null);
     state.status = preview.reason;
+    state.consecutivePasses = 0;
   }
 
   advanceTurn(state);

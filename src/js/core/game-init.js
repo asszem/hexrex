@@ -18,6 +18,7 @@ import { evaluateGameOver } from "./game-over.js";
 import { buildPlacementPreview } from "./placement-rules.js";
 import { buildRemovalPreview } from "./removal-rules.js";
 import { getAvailablePlacementKeys } from "./move-validation.js";
+import { hasAnyLegalPlacement } from "./scoring.js";
 
 const dom = getDomRefs();
 const autoLoadedState = loadAuto();
@@ -68,6 +69,13 @@ function renderApp() {
   if (boardCells.length !== store.state.boardSize * store.state.boardSize) {
     boardCells = createBoardCells(store.state.boardSize);
   }
+  const activePlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
+  const aiTurnActive = Boolean(activePlayer && activePlayer.controlType === "ai" && !store.state.gameOver);
+  if (aiTurnActive) {
+    store.state.aiThinking = true;
+    store.state.preview = null;
+    store.state.hoverKey = null;
+  }
   if (!store.state.gameOver) {
     const gameOver = evaluateGameOver(store.state, buildPlacementPreview, buildRemovalPreview);
     if (gameOver) {
@@ -78,8 +86,12 @@ function renderApp() {
   }
   dom.board.setAttribute("viewBox", `0 0 ${boardCells.viewWidth} ${boardCells.viewHeight}`);
   dom.board.style.width = `${Math.round(viewport.baseBoardWidth * viewport.zoom)}px`;
+  dom.boardWrapper.classList.toggle("ai-thinking", Boolean(store.state.aiThinking));
   dom.zoomLevel.textContent = `Zoom ${Math.round(viewport.zoom * 100)}%`;
   dom.hintButton.textContent = store.state.hintCells?.length ? "Hide" : "Hint";
+  if (dom.passButton) {
+    dom.passButton.disabled = store.state.gameOver || store.state.aiThinking;
+  }
   dom.ruleList.innerHTML = buildRuleLines(store.state.rules).map((line) => `<li>${line}</li>`).join("");
   renderBoard(dom, boardCells, store.state);
   renderTurnPanel(dom, store.state);
@@ -91,7 +103,9 @@ function renderApp() {
   }
 
   if (store.state.winner) {
+    if (!store.state.endgameDismissed) {
     renderEndgame(dom, store.state.winner, store.state);
+    }
   }
 
   scheduleAiTurn();
@@ -105,6 +119,9 @@ function openSetupModal() {
 }
 
 dom.newGameButton.addEventListener("click", openSetupModal);
+if (dom.passButton) {
+  dom.passButton.addEventListener("click", applyPassTurn);
+}
 
 dom.hintButton.addEventListener("click", () => {
   if (store.state.hintCells?.length) {
@@ -198,6 +215,28 @@ dom.confirmNewGame.addEventListener("click", () => {
   centerBoardInArena();
 });
 
+dom.endgameModal.addEventListener("close", () => {
+  if (store.state.gameOver) {
+    store.state.endgameDismissed = true;
+  }
+});
+
+function applyPassTurn() {
+  if (store.state.gameOver || store.state.aiThinking) {
+    return;
+  }
+  const player = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
+  applyResolvedMove(store.state, {
+    type: "pass",
+    valid: true,
+    cells: [],
+    reason: hasAnyLegalPlacement(store.state, store.state.currentPlayer, buildPlacementPreview)
+      ? `${player?.name ?? "Player"} passes.`
+      : `${player?.name ?? "Player"} has no legal placement and must pass.`,
+  });
+  renderApp();
+}
+
 window.addEventListener("keydown", (event) => {
   if (event.code === "Numpad0") {
     event.preventDefault();
@@ -230,6 +269,12 @@ window.addEventListener("keydown", (event) => {
     store.state.status = "Quick save loaded.";
     showToast(dom, "Quick save loaded.");
     renderApp();
+    return;
+  }
+
+  if (event.code === "Space" && !dom.setupModal.open && !dom.endgameModal.open) {
+    event.preventDefault();
+    applyPassTurn();
   }
 });
 
@@ -327,24 +372,35 @@ function scheduleAiTurn() {
   }
 
   if (store.state.gameOver) {
+    store.state.aiThinking = false;
     return;
   }
 
   const player = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
   if (!player || player.controlType !== "ai") {
+    store.state.aiThinking = false;
     return;
   }
+
+  store.state.aiThinking = true;
+  store.state.preview = null;
+  store.state.hoverKey = null;
+  store.state.hintCells = [];
+  store.state.status = `${player.name} is thinking...`;
 
   aiTurnTimer = window.setTimeout(() => {
     const activePlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
     if (!activePlayer || activePlayer.controlType !== "ai" || store.state.gameOver) {
+      store.state.aiThinking = false;
       return;
     }
     const move = chooseAiMove(store.state, activePlayer);
     if (!move) {
+      store.state.aiThinking = false;
       return;
     }
     applyResolvedMove(store.state, move);
+    store.state.aiThinking = false;
     store.state.hintCells = [];
     renderApp();
   }, 260);
@@ -362,7 +418,8 @@ function buildRuleLines(rules) {
     rules.removeHex
       ? "Owned edge hexes may be removed."
       : "Hexes can only be added.",
+    "A player may pass instead of moving.",
+    "If all players pass consecutively, the game ends.",
     "Captured cells convert and score double.",
-    "Game ends when the active player cannot place another hex.",
   ];
 }

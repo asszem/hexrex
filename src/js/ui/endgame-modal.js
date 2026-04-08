@@ -4,9 +4,20 @@ export function renderEndgame(dom, result, state) {
       ([playerId, entry]) => `
         <article class="summary-row">
           <h3>${state.players.find((player) => player.id === playerId)?.name ?? playerId}</h3>
-          <p>Score: ${entry.score}</p>
-          <p>Captured: ${entry.captured}</p>
-          <p>Longest line: ${entry.longestLine}</p>
+          <dl class="summary-metrics">
+            <div>
+              <dt>Score</dt>
+              <dd>${entry.score}</dd>
+            </div>
+            <div>
+              <dt>Captured</dt>
+              <dd>${entry.captured}</dd>
+            </div>
+            <div>
+              <dt>Longest line</dt>
+              <dd>${entry.longestLine}</dd>
+            </div>
+          </dl>
         </article>
       `,
     )

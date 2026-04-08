@@ -4,6 +4,7 @@ export function getDomRefs() {
     boardWrapper: document.querySelector(".board-wrapper"),
     boardContent: document.getElementById("board-content"),
     hintButton: document.getElementById("hint-button"),
+    passButton: document.getElementById("pass-button"),
     newGameButton: document.getElementById("new-game-button"),
     undoButton: document.getElementById("undo-button"),
     arenaTurnIndicator: document.getElementById("arena-turn-indicator"),

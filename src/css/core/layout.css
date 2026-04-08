@@ -131,6 +131,10 @@ body {
   cursor: grabbing;
 }
 
+.board-wrapper.ai-thinking {
+  cursor: progress;
+}
+
 .board-content {
   width: max-content;
   min-width: 100%;

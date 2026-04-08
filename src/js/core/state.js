@@ -10,8 +10,11 @@ export function createInitialState(config = {}) {
     mode: "place",
     cells: new Map(),
     history: [],
+    consecutivePasses: 0,
     winner: null,
     gameOver: false,
+    endgameDismissed: false,
+    aiThinking: false,
     status: "Hover a cell to preview the move.",
     preview: null,
     hintCells: [],
@@ -43,6 +46,9 @@ export function cloneState(state) {
         }
       : null,
     hintCells: [...(state.hintCells ?? [])],
+    aiThinking: Boolean(state.aiThinking),
+    consecutivePasses: state.consecutivePasses ?? 0,
+    endgameDismissed: Boolean(state.endgameDismissed),
   };
 }
 
@@ -65,6 +71,8 @@ export function pushHistorySnapshot(state) {
     players: state.players.map((player) => ({ ...player })),
     boardSize: state.boardSize,
     rules: { ...state.rules },
+    consecutivePasses: state.consecutivePasses ?? 0,
+    endgameDismissed: Boolean(state.endgameDismissed),
     cells: new Map(
       Array.from(state.cells.entries(), ([key, value]) => [
         key,
@@ -85,6 +93,8 @@ export function popHistorySnapshot(state) {
   state.players = snapshot.players.map((player) => ({ ...player }));
   state.boardSize = snapshot.boardSize;
   state.rules = { ...snapshot.rules };
+  state.consecutivePasses = snapshot.consecutivePasses ?? 0;
+  state.endgameDismissed = Boolean(snapshot.endgameDismissed);
   state.cells = new Map(
     Array.from(snapshot.cells.entries(), ([key, value]) => [
       key,
@@ -95,5 +105,7 @@ export function popHistorySnapshot(state) {
   state.hintCells = [];
   state.winner = null;
   state.gameOver = false;
+  state.endgameDismissed = false;
+  state.aiThinking = false;
   return true;
 }

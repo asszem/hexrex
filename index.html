@@ -25,6 +25,7 @@
       <div class="brand-block">
         <h1 class="site-title">Hexrex</h1>
         <button id="hint-button" type="button">Hint</button>
+        <button id="pass-button" type="button">Pass</button>
       </div>
       <div class="header-center"></div>
       <div class="header-actions">
@@ -76,10 +77,13 @@
     </footer>
 
     <dialog id="endgame-modal" class="endgame-modal">
-      <article class="modal-card">
-        <h2>Game Over</h2>
+      <article class="modal-card endgame-card">
+        <header class="endgame-header">
+          <p class="panel-label">Match Result</p>
+          <h2>Game Over</h2>
+        </header>
         <div id="endgame-summary"></div>
-        <form method="dialog">
+        <form method="dialog" class="endgame-actions">
           <button type="submit">Close</button>
         </form>
       </article>

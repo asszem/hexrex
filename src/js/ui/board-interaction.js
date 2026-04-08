@@ -14,7 +14,7 @@ export function bindBoardInteraction(store, dom, renderApp) {
 
   dom.board.addEventListener("mousemove", (event) => {
     const polygon = event.target.closest("polygon[data-key]");
-    if (!polygon || store.state.gameOver) {
+    if (!polygon || store.state.gameOver || store.state.aiThinking) {
       return;
     }
 
@@ -31,7 +31,9 @@ export function bindBoardInteraction(store, dom, renderApp) {
   dom.board.addEventListener("mouseleave", () => {
     store.state.hoverKey = null;
     clearPreview(store.state);
-    store.state.status = "Hover a cell to preview the move.";
+    if (!store.state.aiThinking) {
+      store.state.status = "Hover a cell to preview the move.";
+    }
     renderApp();
   });
 
@@ -41,7 +43,7 @@ export function bindBoardInteraction(store, dom, renderApp) {
     }
 
     const polygon = event.target.closest("polygon[data-key]");
-    if (!polygon || store.state.gameOver) {
+    if (!polygon || store.state.gameOver || store.state.aiThinking) {
       return;
     }
     pendingTap = {
@@ -74,7 +76,7 @@ export function bindBoardInteraction(store, dom, renderApp) {
     const tapKey = pendingTap.key;
     pendingTap = null;
 
-    if (duration > 180 || moved > 8 || !polygon || polygon.dataset.key !== tapKey || store.state.gameOver) {
+    if (duration > 180 || moved > 8 || !polygon || polygon.dataset.key !== tapKey || store.state.gameOver || store.state.aiThinking) {
       return;
     }
 

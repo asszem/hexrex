@@ -1,6 +1,7 @@
 import { DIRECTIONS } from "./constants.js";
 import { getNeighborKey } from "./board.js";
 import { getCellState } from "./state.js";
+import { placementCausesSelfCapture } from "./move-validation.js";
 
 export function getScoreSummary(state) {
   const summary = {};
@@ -61,11 +62,12 @@ function countRun(state, originKey, owner, direction) {
   return count;
 }
 
-export function hasAnyLegalMove(state, playerId, placementFn, removalFn) {
+export function hasAnyLegalPlacement(state, playerId, placementFn) {
   for (let row = 0; row < state.boardSize; row += 1) {
     for (let col = 0; col < state.boardSize; col += 1) {
       const key = `${col},${row}`;
-      if (placementFn({ ...state, currentPlayer: playerId }, key).valid) {
+      const preview = placementFn({ ...state, currentPlayer: playerId }, key);
+      if (preview.valid && !placementCausesSelfCapture({ ...state, currentPlayer: playerId }, preview)) {
         return true;
       }
     }

@@ -1,9 +1,65 @@
-.summary-row + .summary-row {
-  margin-top: 12px;
+.endgame-card {
+  width: min(640px, calc(100vw - 40px));
+  max-width: 640px;
+}
+
+.endgame-header {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+
+.endgame-header h2 {
+  margin: 0;
+}
+
+#endgame-summary {
+  display: grid;
+  gap: 12px;
 }
 
 .winner-line {
-  font-size: 1.2rem;
+  margin: 0 0 4px;
+  font-size: 1.15rem;
   font-weight: 700;
-  margin-bottom: 16px;
+}
+
+.summary-row {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(64, 77, 83, 0.08);
+  border: 1px solid rgba(64, 77, 83, 0.1);
+}
+
+.summary-row h3 {
+  margin: 0 0 10px;
+}
+
+.summary-metrics {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.summary-metrics div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.summary-metrics dt {
+  color: rgba(34, 48, 54, 0.68);
+}
+
+.summary-metrics dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.endgame-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
 }

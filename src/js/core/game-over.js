@@ -1,7 +1,7 @@
-import { getScoreSummary, hasAnyLegalMove } from "./scoring.js";
+import { getScoreSummary } from "./scoring.js";
 
 export function evaluateGameOver(state, placementFn, removalFn) {
-  if (hasAnyLegalMove(state, state.currentPlayer, placementFn, removalFn)) {
+  if ((state.consecutivePasses ?? 0) < state.players.length) {
     return null;
   }
 
