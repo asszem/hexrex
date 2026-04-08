@@ -1,0 +1,9 @@
+.summary-row + .summary-row {
+  margin-top: 12px;
+}
+
+.winner-line {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}

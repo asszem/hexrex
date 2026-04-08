@@ -1,0 +1,21 @@
+body {
+  font-family: "Trebuchet MS", "Gill Sans", sans-serif;
+}
+
+h1 {
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
+  line-height: 1;
+}
+
+.site-title {
+  letter-spacing: 0.02em;
+}
+
+.eyebrow,
+.panel-label {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.7rem;
+  opacity: 0.72;
+  margin-bottom: 6px;
+}

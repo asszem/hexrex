@@ -1,0 +1,7 @@
+.hex-cell.captured-a {
+  fill: url(#captured-a-gradient);
+}
+
+.hex-cell.captured-b {
+  fill: url(#captured-b-gradient);
+}

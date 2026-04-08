@@ -1,0 +1,13 @@
+.hex-cell.preview-valid {
+  fill: var(--preview-color, var(--valid));
+  stroke: var(--preview-stroke, #fff4cc);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--preview-color, #ffffff) 55%, white 45%));
+}
+
+.hex-cell.preview-invalid {
+  fill: color-mix(in srgb, var(--preview-color, var(--valid)) 45%, #b3151b 55%);
+  stroke: var(--preview-stroke, #5c0b10);
+  stroke-width: 4;
+  filter: none;
+}

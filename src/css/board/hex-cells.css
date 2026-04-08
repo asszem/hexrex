@@ -1,0 +1,27 @@
+.hex-cell {
+  fill: url(#neutral-hex-gradient);
+  stroke: var(--hex-neutral-stroke);
+  stroke-width: 2;
+  transition: fill 120ms ease, transform 120ms ease, filter 120ms ease, stroke 120ms ease;
+}
+
+.hex-cell:hover {
+  stroke: rgba(255, 248, 229, 0.52);
+}
+
+.hex-cell.occupied.playerA {
+  fill: url(#player-a-gradient);
+  filter: drop-shadow(0 0 8px rgba(103, 199, 255, 0.22));
+}
+
+.hex-cell.occupied.playerB {
+  fill: url(#player-b-gradient);
+  filter: drop-shadow(0 0 8px rgba(141, 227, 196, 0.2));
+}
+
+.cell-label {
+  font-size: 11px;
+  fill: rgba(255, 248, 231, 0.4);
+  text-anchor: middle;
+  pointer-events: none;
+}

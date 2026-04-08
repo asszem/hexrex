@@ -1,0 +1,7 @@
+.board-svg {
+  width: min(100%, 760px);
+  max-width: 100%;
+  height: auto;
+  display: block;
+  flex: 0 0 auto;
+}

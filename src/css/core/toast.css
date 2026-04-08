@@ -1,0 +1,20 @@
+.toast-root {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: grid;
+  gap: 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast {
+  min-width: 220px;
+  max-width: 320px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(24, 34, 47, 0.92);
+  color: #fff8eb;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}

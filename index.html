@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HexRex</title>
+    <link rel="stylesheet" href="./src/css/core/variables.css" />
+    <link rel="stylesheet" href="./src/css/core/reset.css" />
+    <link rel="stylesheet" href="./src/css/core/layout.css" />
+    <link rel="stylesheet" href="./src/css/core/buttons.css" />
+    <link rel="stylesheet" href="./src/css/core/typography.css" />
+    <link rel="stylesheet" href="./src/css/core/toast.css" />
+    <link rel="stylesheet" href="./src/css/board/board-shell.css" />
+    <link rel="stylesheet" href="./src/css/board/hex-cells.css" />
+    <link rel="stylesheet" href="./src/css/board/hover-preview.css" />
+    <link rel="stylesheet" href="./src/css/board/capture-gradient.css" />
+    <link rel="stylesheet" href="./src/css/panels/sidebar.css" />
+    <link rel="stylesheet" href="./src/css/panels/scoreboard.css" />
+    <link rel="stylesheet" href="./src/css/panels/turn-status.css" />
+    <link rel="stylesheet" href="./src/css/forms/modal.css" />
+    <link rel="stylesheet" href="./src/css/forms/endgame.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand-block">
+        <h1 class="site-title">Hexrex</h1>
+      </div>
+      <div class="header-center"></div>
+      <div class="header-actions">
+        <div class="board-actions">
+          <button id="new-game-button" type="button">Start New Game</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="board-column">
+        <section class="board-stage">
+          <div class="board-wrapper">
+            <div id="arena-turn-indicator" class="arena-turn-indicator" aria-live="polite"></div>
+            <svg
+              id="board"
+              class="board-svg"
+              viewBox="0 0 960 900"
+              role="img"
+              aria-label="HexRex game board"
+            ></svg>
+          </div>
+        </section>
+      </section>
+      <aside class="sidebar">
+        <section class="panel turn-panel">
+          <p class="panel-label">Current Turn</p>
+          <h2 id="turn-player">Player 1</h2>
+          <p id="status-message">Hover a cell to preview the move.</p>
+        </section>
+        <section class="panel scoreboard">
+          <p class="panel-label">Player Status</p>
+          <div id="score-panel"></div>
+        </section>
+        <section class="panel info-panel">
+          <p class="panel-label">Rule Snapshot</p>
+          <ul class="info-list">
+            <li>Place or remove once per turn.</li>
+            <li>Disconnected placements are single-cell only.</li>
+            <li>Captured cells convert and score double.</li>
+            <li>Game ends when the active player has no legal move.</li>
+          </ul>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <p>F5 quick-save, F9 quick-load, right-click hex to undo.</p>
+    </footer>
+
+    <dialog id="endgame-modal" class="endgame-modal">
+      <article class="modal-card">
+        <h2>Game Over</h2>
+        <div id="endgame-summary"></div>
+        <form method="dialog">
+          <button type="submit">Close</button>
+        </form>
+      </article>
+    </dialog>
+
+    <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+
+    <script type="module" src="./src/js/core/game-init.js"></script>
+  </body>
+</html>

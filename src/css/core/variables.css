@@ -1,0 +1,15 @@
+:root {
+  --bg: #f3ead8;
+  --bg-accent: #d9c39b;
+  --ink: #18222f;
+  --panel: rgba(255, 250, 240, 0.88);
+  --border: rgba(24, 34, 47, 0.18);
+  --shadow: 0 18px 40px rgba(24, 34, 47, 0.14);
+  --player-a: #1f6feb;
+  --player-b: #2f9d7e;
+  --valid: rgba(34, 139, 72, 0.35);
+  --invalid: rgba(193, 39, 45, 0.35);
+  --hex-neutral-top: #cfc1ac;
+  --hex-neutral-bottom: #a99881;
+  --hex-neutral-stroke: rgba(255, 247, 231, 0.28);
+}

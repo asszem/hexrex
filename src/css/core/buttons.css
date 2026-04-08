@@ -1,0 +1,15 @@
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.72rem 1rem;
+  background: linear-gradient(135deg, #255e63, #214779);
+  color: #fff4d9;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(34, 60, 102, 0.2);
+  font-weight: 600;
+  line-height: 1;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}

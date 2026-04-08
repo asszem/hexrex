@@ -1,0 +1,17 @@
+.endgame-modal {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.endgame-modal::backdrop {
+  background: rgba(24, 34, 47, 0.4);
+}
+
+.modal-card {
+  min-width: min(480px, 90vw);
+  padding: 24px;
+  border-radius: 24px;
+  background: #fff8eb;
+  box-shadow: var(--shadow);
+}
