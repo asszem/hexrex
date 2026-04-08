@@ -28,6 +28,11 @@ export function renderSetupModal(dom, draft) {
             <option value="human" ${player.controlType !== "ai" ? "selected" : ""}>Human</option>
             <option value="ai" ${player.controlType === "ai" ? "selected" : ""}>AI</option>
           </select>
+          <select class="setup-player-difficulty" data-player-index="${index}" ${player.controlType === "ai" ? "" : "disabled"}>
+            <option value="easy" ${player.difficulty === "easy" ? "selected" : ""}>Easy</option>
+            <option value="medium" ${player.difficulty === "medium" ? "selected" : ""}>Medium</option>
+            <option value="hard" ${player.difficulty === "hard" ? "selected" : ""}>Hard</option>
+          </select>
         </article>
       `,
     )

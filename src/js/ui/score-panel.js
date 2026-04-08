@@ -9,7 +9,7 @@ export function renderScorePanel(dom, state) {
         <article class="score-row">
           <header class="score-row-header">
             <span class="score-player-dot" style="background:${player.fill}"></span>
-            <h3 style="color:${player.fill}">${player.name}</h3>
+            <h3 style="color:${player.fill}">${formatPlayerLabel(player)}</h3>
             <strong class="score-total">${entry.score}</strong>
           </header>
           <div class="score-metrics">
@@ -24,4 +24,15 @@ export function renderScorePanel(dom, state) {
       `;
     })
     .join("");
+}
+
+function formatPlayerLabel(player) {
+  if (player.controlType === "ai") {
+    return `${player.name} (AI - ${capitalize(player.difficulty ?? "medium")})`;
+  }
+  return player.name;
+}
+
+function capitalize(value) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }

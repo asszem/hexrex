@@ -43,10 +43,16 @@ export function deserializeState(payload) {
 }
 
 export function saveAuto(state) {
+  if (typeof localStorage === "undefined" || typeof localStorage.setItem !== "function") {
+    return;
+  }
   localStorage.setItem(AUTO_SAVE_KEY, serializeState(state));
 }
 
 export function saveQuick(state) {
+  if (typeof localStorage === "undefined" || typeof localStorage.setItem !== "function") {
+    return;
+  }
   const payload = serializeState(state);
   localStorage.setItem(QUICK_SAVE_KEY, payload);
   localStorage.setItem(AUTO_SAVE_KEY, payload);

@@ -12,6 +12,8 @@ import { renderEndgame } from "../ui/endgame-modal.js";
 import { createSetupDraft, renderSetupModal } from "../ui/setup-modal.js";
 import { showToast } from "../ui/toast.js";
 import { bindBoardInteraction } from "../ui/board-interaction.js";
+import { chooseAiMove } from "../ai/select-move.js";
+import { applyResolvedMove } from "./apply-move.js";
 
 const dom = getDomRefs();
 const autoLoadedState = loadAuto();
@@ -20,6 +22,7 @@ const store = {
 };
 let boardCells = createBoardCells(store.state.boardSize);
 let setupDraft = createSetupDraft(store.state);
+let aiTurnTimer = null;
 const viewport = {
   zoom: 1,
   minZoom: 0.6,
@@ -66,6 +69,8 @@ function renderApp() {
   if (store.state.winner) {
     renderEndgame(dom, store.state.winner, store.state);
   }
+
+  scheduleAiTurn();
 }
 
 function openSetupModal() {
@@ -92,11 +97,24 @@ dom.setupPlayerList.addEventListener("input", (event) => {
 
 dom.setupPlayerList.addEventListener("change", (event) => {
   const select = event.target.closest(".setup-player-control");
-  if (!select) {
+  if (select) {
+    const index = Number(select.dataset.playerIndex);
+    setupDraft.players[index].controlType = select.value;
+    if (select.value !== "ai") {
+      setupDraft.players[index].difficulty = "easy";
+    } else if (!setupDraft.players[index].difficulty) {
+      setupDraft.players[index].difficulty = "medium";
+    }
+    renderSetupModal(dom, setupDraft);
     return;
   }
-  const index = Number(select.dataset.playerIndex);
-  setupDraft.players[index].controlType = select.value;
+
+  const difficulty = event.target.closest(".setup-player-difficulty");
+  if (!difficulty) {
+    return;
+  }
+  const index = Number(difficulty.dataset.playerIndex);
+  setupDraft.players[index].difficulty = difficulty.value;
 });
 
 dom.confirmAddPlayer.addEventListener("click", () => {
@@ -109,6 +127,7 @@ dom.confirmAddPlayer.addEventListener("click", () => {
     id: `player${setupDraft.players.length + 1}`,
     name,
     controlType: "human",
+    difficulty: "easy",
     ...palette,
   });
   dom.newPlayerName.value = "";
@@ -245,3 +264,32 @@ window.render_game_to_text = function renderGameToText() {
 window.advanceTime = function advanceTime() {
   renderApp();
 };
+
+function scheduleAiTurn() {
+  if (aiTurnTimer) {
+    window.clearTimeout(aiTurnTimer);
+    aiTurnTimer = null;
+  }
+
+  if (store.state.gameOver) {
+    return;
+  }
+
+  const player = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
+  if (!player || player.controlType !== "ai") {
+    return;
+  }
+
+  aiTurnTimer = window.setTimeout(() => {
+    const activePlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
+    if (!activePlayer || activePlayer.controlType !== "ai" || store.state.gameOver) {
+      return;
+    }
+    const move = chooseAiMove(store.state, activePlayer);
+    if (!move) {
+      return;
+    }
+    applyResolvedMove(store.state, move);
+    renderApp();
+  }, 260);
+}

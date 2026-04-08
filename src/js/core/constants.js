@@ -23,6 +23,7 @@ export function createDefaultPlayers(count = 2) {
       id: `player${index + 1}`,
       name: `Player ${index + 1}`,
       controlType: index === 0 ? "human" : index === 1 ? "ai" : "human",
+      difficulty: index === 1 ? "medium" : "easy",
       ...palette,
     };
   });
