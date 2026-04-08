@@ -37,9 +37,9 @@ export function cloneState(state) {
     ),
     history: state.history.map((entry) => ({
       ...entry,
-      players: entry.players.map((player) => ({ ...player })),
+      players: (entry.players ?? state.players).map((player) => ({ ...player })),
       cells: new Map(
-        Array.from(entry.cells.entries(), ([key, value]) => [
+        Array.from((entry.cells ?? state.cells).entries(), ([key, value]) => [
           key,
           { ...value },
         ]),
@@ -98,8 +98,8 @@ export function popHistorySnapshot(state) {
   const snapshot = state.history.pop();
   state.currentPlayer = snapshot.currentPlayer;
   state.mode = snapshot.mode;
-  state.players = snapshot.players.map((player) => ({ ...player }));
-  state.boardSize = snapshot.boardSize;
+  state.players = (snapshot.players ?? state.players).map((player) => ({ ...player }));
+  state.boardSize = snapshot.boardSize ?? state.boardSize;
   state.rules = { ...snapshot.rules };
   state.consecutivePasses = snapshot.consecutivePasses ?? 0;
   state.endgameDismissed = Boolean(snapshot.endgameDismissed);
