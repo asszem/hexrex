@@ -1,11 +1,9 @@
-import { PLAYER_META } from "../core/constants.js";
-
-export function renderEndgame(dom, result) {
+export function renderEndgame(dom, result, state) {
   dom.endgameSummary.innerHTML = Object.entries(result.scores)
     .map(
       ([playerId, entry]) => `
         <article class="summary-row">
-          <h3>${PLAYER_META[playerId].name}</h3>
+          <h3>${state.players.find((player) => player.id === playerId)?.name ?? playerId}</h3>
           <p>Score: ${entry.score}</p>
           <p>Captured: ${entry.captured}</p>
           <p>Longest line: ${entry.longestLine}</p>

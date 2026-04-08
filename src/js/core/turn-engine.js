@@ -1,12 +1,11 @@
-import { PLAYER_ORDER } from "./constants.js";
-
-export function getNextPlayer(playerId) {
-  const index = PLAYER_ORDER.indexOf(playerId);
-  return PLAYER_ORDER[(index + 1) % PLAYER_ORDER.length];
+export function getNextPlayer(state, playerId) {
+  const order = state.players.map((player) => player.id);
+  const index = order.indexOf(playerId);
+  return order[(index + 1) % order.length];
 }
 
 export function advanceTurn(state) {
-  state.currentPlayer = getNextPlayer(state.currentPlayer);
+  state.currentPlayer = getNextPlayer(state, state.currentPlayer);
   state.preview = null;
 }
 

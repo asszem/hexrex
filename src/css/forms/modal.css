@@ -15,3 +15,58 @@
   background: #fff8eb;
   box-shadow: var(--shadow);
 }
+
+.setup-card {
+  display: grid;
+  gap: 16px;
+}
+
+.setup-field {
+  display: grid;
+  gap: 8px;
+}
+
+.setup-player-list {
+  display: grid;
+  gap: 8px;
+}
+
+.setup-player-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(98, 62, 8, 0.08);
+}
+
+.setup-player-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(24, 34, 47, 0.12);
+  background: #fffdf7;
+}
+
+.setup-add-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.setup-add-row input,
+.setup-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(24, 34, 47, 0.15);
+  background: #fffdf7;
+}
+
+.setup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  align-items: center;
+}

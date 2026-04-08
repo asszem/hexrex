@@ -84,6 +84,30 @@
       </article>
     </dialog>
 
+    <dialog id="setup-modal" class="endgame-modal">
+      <article class="modal-card setup-card">
+        <h2>Start New Game</h2>
+        <label class="setup-field">
+          <span>Grid Size</span>
+          <select id="setup-grid-size"></select>
+        </label>
+        <section class="setup-field">
+          <span>Players</span>
+          <div id="setup-player-list" class="setup-player-list"></div>
+        </section>
+        <div id="add-player-row" class="setup-add-row">
+          <input id="new-player-name" type="text" maxlength="20" placeholder="Enter player name" />
+          <button id="confirm-add-player" type="button">Add</button>
+        </div>
+        <div class="setup-actions">
+          <button id="confirm-new-game" type="button">Start Game</button>
+          <form method="dialog">
+            <button type="submit">Cancel</button>
+          </form>
+        </div>
+      </article>
+    </dialog>
+
     <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
 
     <script type="module" src="./src/js/core/game-init.js"></script>

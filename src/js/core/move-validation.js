@@ -25,12 +25,11 @@ export function placementCausesSelfCapture(state, preview) {
     });
   }
 
-  const ownCaptures = findCaptures(simulated, getOpponent(simulated.currentPlayer));
-  return ownCaptures.some((group) =>
-    group.some((key) => getCellState(simulated, key)?.owner === simulated.currentPlayer),
-  );
-}
-
-function getOpponent(playerId) {
-  return playerId === "playerA" ? "playerB" : "playerA";
+  return simulated.players
+    .filter((player) => player.id !== simulated.currentPlayer)
+    .some((player) =>
+      findCaptures(simulated, player.id).some((group) =>
+        group.some((key) => getCellState(simulated, key)?.owner === simulated.currentPlayer),
+      ),
+    );
 }

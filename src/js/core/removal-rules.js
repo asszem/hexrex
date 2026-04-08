@@ -12,7 +12,7 @@ export function buildRemovalPreview(state, key) {
     return invalidRemoval(key, "A one-hex group cannot be removed to zero.");
   }
 
-  const touchesEmpty = getNeighbors(key).some((neighborKey) => !getCellState(state, neighborKey));
+  const touchesEmpty = getNeighbors(key, state.boardSize).some((neighborKey) => !getCellState(state, neighborKey));
   if (!touchesEmpty) {
     return invalidRemoval(key, "Only edge hexes can be removed.");
   }
@@ -47,7 +47,7 @@ function collectGroup(state, startKey, owner) {
       continue;
     }
     visited.add(currentKey);
-    for (const neighborKey of getNeighbors(currentKey)) {
+    for (const neighborKey of getNeighbors(currentKey, state.boardSize)) {
       if (!visited.has(neighborKey)) {
         queue.push(neighborKey);
       }

@@ -1,9 +1,8 @@
-import { PLAYER_META } from "../core/constants.js";
-
 export function renderBoard(dom, boardCells, state) {
   dom.board.innerHTML = "";
-  dom.board.appendChild(buildGradients());
-  const previewColor = PLAYER_META[state.currentPlayer].fill;
+  const playerMap = Object.fromEntries(state.players.map((player) => [player.id, player]));
+  dom.board.appendChild(buildGradients(state.players));
+  const previewColor = playerMap[state.currentPlayer].fill;
 
   for (const cell of boardCells) {
     const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -16,9 +15,12 @@ export function renderBoard(dom, boardCells, state) {
 
     const marker = state.cells.get(cell.id);
     if (marker) {
-      polygon.classList.add("occupied", marker.owner);
+      const owner = playerMap[marker.owner];
+      polygon.classList.add("occupied");
+      polygon.style.fill = marker.captured ? `url(#captured-${owner.id})` : `url(#piece-${owner.id})`;
+      polygon.style.filter = `drop-shadow(0 0 8px ${owner.glow})`;
       if (marker.captured) {
-        polygon.classList.add(PLAYER_META[marker.owner].captureClass);
+        polygon.dataset.captured = "true";
       }
     }
 
@@ -40,13 +42,13 @@ export function renderBoard(dom, boardCells, state) {
   }
 }
 
-function buildGradients() {
+function buildGradients(players) {
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   defs.appendChild(buildGradient("neutral-hex-gradient", ["#cfc1ac", "#a99881"]));
-  defs.appendChild(buildGradient("player-a-gradient", ["#67c7ff", "#1f6feb"]));
-  defs.appendChild(buildGradient("player-b-gradient", ["#8de3c4", "#2f9d7e"]));
-  defs.appendChild(buildGradient("captured-a-gradient", ["#6dd0ff", "#1f6feb"]));
-  defs.appendChild(buildGradient("captured-b-gradient", ["#a8efd8", "#2f9d7e"]));
+  for (const player of players) {
+    defs.appendChild(buildGradient(`piece-${player.id}`, [player.gradientStart, player.fill]));
+    defs.appendChild(buildGradient(`captured-${player.id}`, [player.captureStart, player.fill]));
+  }
   return defs;
 }
 

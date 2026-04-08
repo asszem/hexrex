@@ -1,11 +1,12 @@
-import { DIRECTIONS, OPPOSITE_DIRECTION, PLAYER_ORDER } from "./constants.js";
+import { DIRECTIONS } from "./constants.js";
 import { getNeighborKey } from "./board.js";
 import { getCellState } from "./state.js";
 
 export function getScoreSummary(state) {
   const summary = {};
 
-  for (const playerId of PLAYER_ORDER) {
+  for (const player of state.players) {
+    const playerId = player.id;
     summary[playerId] = {
       owned: 0,
       captured: 0,
@@ -49,20 +50,20 @@ function measureLine(state, key, owner) {
 }
 
 function countRun(state, originKey, owner, direction) {
-  let nextKey = getNeighborKey(originKey, direction);
+  let nextKey = getNeighborKey(originKey, direction, state.boardSize);
   let count = 0;
 
   while (nextKey && getCellState(state, nextKey)?.owner === owner) {
     count += 1;
-    nextKey = getNeighborKey(nextKey, direction);
+    nextKey = getNeighborKey(nextKey, direction, state.boardSize);
   }
 
   return count;
 }
 
 export function hasAnyLegalMove(state, playerId, placementFn, removalFn) {
-  for (let row = 0; row < 9; row += 1) {
-    for (let col = 0; col < 9; col += 1) {
+  for (let row = 0; row < state.boardSize; row += 1) {
+    for (let col = 0; col < state.boardSize; col += 1) {
       const key = `${col},${row}`;
       if (placementFn({ ...state, currentPlayer: playerId }, key).valid) {
         return true;

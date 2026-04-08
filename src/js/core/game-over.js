@@ -1,4 +1,3 @@
-import { PLAYER_META } from "./constants.js";
 import { getScoreSummary, hasAnyLegalMove } from "./scoring.js";
 
 export function evaluateGameOver(state, placementFn, removalFn) {
@@ -14,7 +13,7 @@ export function evaluateGameOver(state, placementFn, removalFn) {
 
   return {
     winnerId,
-    winnerName: winnerId ? PLAYER_META[winnerId].name : "Tie",
+    winnerName: winnerId ? state.players.find((player) => player.id === winnerId)?.name ?? "Winner" : "Tie",
     scores,
   };
 }

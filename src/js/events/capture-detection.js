@@ -27,7 +27,7 @@ function collectOpponentGroups(state, actingPlayer) {
       }
       visited.add(currentKey);
       group.push(currentKey);
-      for (const neighborKey of getNeighbors(currentKey)) {
+      for (const neighborKey of getNeighbors(currentKey, state.boardSize)) {
         if (!visited.has(neighborKey)) {
           queue.push(neighborKey);
         }
@@ -45,14 +45,14 @@ function isCapturedGroup(state, group) {
   const visited = new Set();
 
   for (const key of group) {
-    for (const neighborKey of getNeighbors(key)) {
+    for (const neighborKey of getNeighbors(key, state.boardSize)) {
       if (!groupSet.has(neighborKey) && !getCellState(state, neighborKey)) {
         queue.push(neighborKey);
       }
     }
   }
 
-  const edgeSet = new Set(edgeReachableKeys());
+  const edgeSet = new Set(edgeReachableKeys(state.boardSize));
   while (queue.length > 0) {
     const currentKey = queue.shift();
     if (visited.has(currentKey) || groupSet.has(currentKey) || getCellState(state, currentKey)) {
@@ -62,7 +62,7 @@ function isCapturedGroup(state, group) {
       return false;
     }
     visited.add(currentKey);
-    for (const neighborKey of getNeighbors(currentKey)) {
+    for (const neighborKey of getNeighbors(currentKey, state.boardSize)) {
       if (!visited.has(neighborKey)) {
         queue.push(neighborKey);
       }

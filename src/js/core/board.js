@@ -1,5 +1,4 @@
 import {
-  BOARD_SIZE,
   BOARD_VIEW_HEIGHT,
   BOARD_VIEW_WIDTH,
   DIRECTIONS,
@@ -8,14 +7,14 @@ import {
   HEX_WIDTH,
 } from "./constants.js";
 
-export function createBoardCells() {
+export function createBoardCells(boardSize) {
   const cells = [];
-  const xOffset = (BOARD_VIEW_WIDTH - HEX_WIDTH * 8.5) / 2;
-  const yOffset = (BOARD_VIEW_HEIGHT - HEX_RADIUS * 12) / 2;
+  const xOffset = (BOARD_VIEW_WIDTH - HEX_WIDTH * (boardSize - 0.5)) / 2;
+  const yOffset = (BOARD_VIEW_HEIGHT - (HEX_RADIUS * 2 + HEX_VERTICAL_STEP * (boardSize - 1))) / 2;
 
-  for (let row = 0; row < BOARD_SIZE; row += 1) {
+  for (let row = 0; row < boardSize; row += 1) {
     const rowOffset = row % 2 === 0 ? 0 : HEX_WIDTH / 2;
-    for (let col = 0; col < BOARD_SIZE; col += 1) {
+    for (let col = 0; col < boardSize; col += 1) {
       const x = xOffset + rowOffset + col * HEX_WIDTH;
       const y = yOffset + row * HEX_VERTICAL_STEP;
       cells.push({
@@ -52,11 +51,11 @@ export function parseCellKey(key) {
   return { col, row };
 }
 
-export function isInsideBoard(col, row) {
-  return col >= 0 && col < BOARD_SIZE && row >= 0 && row < BOARD_SIZE;
+export function isInsideBoard(col, row, boardSize) {
+  return col >= 0 && col < boardSize && row >= 0 && row < boardSize;
 }
 
-export function getNeighborKey(key, direction) {
+export function getNeighborKey(key, direction, boardSize) {
   const { col, row } = parseCellKey(key);
   const axial = offsetToAxial(col, row);
   const nextAxial = {
@@ -64,18 +63,18 @@ export function getNeighborKey(key, direction) {
     r: axial.r + direction.dr,
   };
   const { col: nextCol, row: nextRow } = axialToOffset(nextAxial.q, nextAxial.r);
-  return isInsideBoard(nextCol, nextRow) ? cellKey(nextCol, nextRow) : null;
+  return isInsideBoard(nextCol, nextRow, boardSize) ? cellKey(nextCol, nextRow) : null;
 }
 
-export function getNeighbors(key) {
-  return DIRECTIONS.map((direction) => getNeighborKey(key, direction)).filter(Boolean);
+export function getNeighbors(key, boardSize) {
+  return DIRECTIONS.map((direction) => getNeighborKey(key, direction, boardSize)).filter(Boolean);
 }
 
-export function walkDirection(startKey, direction, count) {
+export function walkDirection(startKey, direction, count, boardSize) {
   const visited = [];
   let currentKey = startKey;
   for (let step = 0; step < count; step += 1) {
-    currentKey = getNeighborKey(currentKey, direction);
+    currentKey = getNeighborKey(currentKey, direction, boardSize);
     if (!currentKey) {
       return null;
     }
@@ -84,11 +83,11 @@ export function walkDirection(startKey, direction, count) {
   return visited;
 }
 
-export function edgeReachableKeys() {
+export function edgeReachableKeys(boardSize) {
   const keys = [];
-  for (let row = 0; row < BOARD_SIZE; row += 1) {
-    for (let col = 0; col < BOARD_SIZE; col += 1) {
-      if (row === 0 || col === 0 || row === BOARD_SIZE - 1 || col === BOARD_SIZE - 1) {
+  for (let row = 0; row < boardSize; row += 1) {
+    for (let col = 0; col < boardSize; col += 1) {
+      if (row === 0 || col === 0 || row === boardSize - 1 || col === boardSize - 1) {
         keys.push(cellKey(col, row));
       }
     }

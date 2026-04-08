@@ -1,8 +1,11 @@
-import { PLAYER_ORDER } from "./constants.js";
+import { DEFAULT_GRID_SIZE, createDefaultPlayers } from "./constants.js";
 
-export function createInitialState() {
+export function createInitialState(config = {}) {
+  const players = config.players ?? createDefaultPlayers(2);
   return {
-    currentPlayer: PLAYER_ORDER[0],
+    currentPlayer: players[0].id,
+    players,
+    boardSize: config.boardSize ?? DEFAULT_GRID_SIZE,
     mode: "place",
     cells: new Map(),
     history: [],
@@ -56,6 +59,8 @@ export function pushHistorySnapshot(state) {
   state.history.push({
     currentPlayer: state.currentPlayer,
     mode: state.mode,
+    players: state.players.map((player) => ({ ...player })),
+    boardSize: state.boardSize,
     cells: new Map(
       Array.from(state.cells.entries(), ([key, value]) => [
         key,
@@ -73,6 +78,8 @@ export function popHistorySnapshot(state) {
   const snapshot = state.history.pop();
   state.currentPlayer = snapshot.currentPlayer;
   state.mode = snapshot.mode;
+  state.players = snapshot.players.map((player) => ({ ...player }));
+  state.boardSize = snapshot.boardSize;
   state.cells = new Map(
     Array.from(snapshot.cells.entries(), ([key, value]) => [
       key,

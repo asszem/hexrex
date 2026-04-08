@@ -8,7 +8,7 @@ export function buildPlacementPreview(state, anchorKey) {
   }
 
   const touchingOwnNeighbors = DIRECTIONS
-    .map((direction) => ({ direction, key: getNeighborKey(anchorKey, direction) }))
+    .map((direction) => ({ direction, key: getNeighborKey(anchorKey, direction, state.boardSize) }))
     .filter(({ key }) => key && getCellState(state, key)?.owner === state.currentPlayer);
 
   if (touchingOwnNeighbors.length === 0) {
@@ -31,7 +31,7 @@ export function buildPlacementPreview(state, anchorKey) {
     );
 
     const placementCells = [anchorKey];
-    const extension = walkDirection(anchorKey, outwardDirection, requiredCount - 1);
+    const extension = walkDirection(anchorKey, outwardDirection, requiredCount - 1, state.boardSize);
     if (!extension) {
       return invalidPreview(anchorKey, `Placement must also extend toward ${outwardDirection.key}.`);
     }
@@ -56,12 +56,12 @@ export function buildPlacementPreview(state, anchorKey) {
 }
 
 function countOwnedRun(state, fromKey, direction, owner) {
-  let currentKey = getNeighborKey(fromKey, direction);
+  let currentKey = getNeighborKey(fromKey, direction, state.boardSize);
   let count = 0;
 
   while (currentKey && getCellState(state, currentKey)?.owner === owner) {
     count += 1;
-    currentKey = getNeighborKey(currentKey, direction);
+    currentKey = getNeighborKey(currentKey, direction, state.boardSize);
   }
 
   return Math.max(1, count);
