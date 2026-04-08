@@ -36,7 +36,11 @@
         <div class="board-actions">
           <button id="new-game-button" type="button">Új játék</button>
         </div>
-        <div class="language-switcher" aria-label="Nyelvválasztó">
+        <div class="header-zoom mobile-only">
+          <p id="zoom-level-mobile">Nagyítás 100%</p>
+          <button id="zoom-reset-button-mobile" type="button">Visszaállítás</button>
+        </div>
+        <div class="language-switcher header-language" aria-label="Nyelvválasztó">
           <button id="lang-hu" class="lang-button" type="button" aria-label="Magyar">
             <img src="./src/assets/flags/hu.svg" alt="Magyar zászló" />
           </button>
@@ -63,6 +67,9 @@
             </div>
           </div>
         </section>
+        <div class="mobile-board-actions mobile-only">
+          <button id="new-game-button-mobile" type="button">Új játék</button>
+        </div>
       </section>
       <aside class="sidebar">
         <section class="panel scoreboard">
@@ -82,9 +89,17 @@
 
     <footer class="site-footer">
       <p id="footer-turn-info">1. játékos - Húzd a kurzort egy mező fölé az előnézethez.</p>
-      <div class="footer-zoom">
+      <div class="footer-zoom footer-zoom-controls">
         <p id="zoom-level">Nagyítás 100%</p>
         <button id="zoom-reset-button" type="button">Visszaállítás</button>
+      </div>
+      <div class="language-switcher footer-language mobile-only" aria-label="Nyelvválasztó">
+        <button id="lang-hu-footer" class="lang-button" type="button" aria-label="Magyar">
+          <img src="./src/assets/flags/hu.svg" alt="Magyar zászló" />
+        </button>
+        <button id="lang-en-footer" class="lang-button" type="button" aria-label="Angol">
+          <img src="./src/assets/flags/gb.svg" alt="Brit zászló" />
+        </button>
       </div>
     </footer>
 

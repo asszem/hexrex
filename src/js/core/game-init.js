@@ -35,6 +35,8 @@ let aiTurnToken = 0;
 let aiReplayTimer = null;
 let aiQueueWorkerActive = false;
 let queuedAiStates = [];
+let zoomFrame = null;
+let pendingZoom = null;
 const viewport = {
   zoom: 1,
   minZoom: 0.6,
@@ -66,10 +68,37 @@ function setZoom(nextZoom, anchor) {
   const contentY = relativeY / previousZoom;
 
   viewport.zoom = clampedZoom;
-  renderApp();
+  applyZoomPresentation();
 
-  dom.boardWrapper.scrollLeft = contentX * viewport.zoom - (anchor ? anchor.clientX - wrapperRect.left : dom.boardWrapper.clientWidth / 2);
-  dom.boardWrapper.scrollTop = contentY * viewport.zoom - (anchor ? anchor.clientY - wrapperRect.top : dom.boardWrapper.clientHeight / 2);
+  dom.boardWrapper.scrollLeft =
+    contentX * viewport.zoom - (anchor ? anchor.clientX - wrapperRect.left : dom.boardWrapper.clientWidth / 2);
+  dom.boardWrapper.scrollTop =
+    contentY * viewport.zoom - (anchor ? anchor.clientY - wrapperRect.top : dom.boardWrapper.clientHeight / 2);
+}
+
+function applyZoomPresentation() {
+  const zoomText = t("zoom.level", { percent: Math.round(viewport.zoom * 100) });
+  dom.board.style.width = `${Math.round(viewport.baseBoardWidth * viewport.zoom)}px`;
+  dom.zoomLevel.textContent = zoomText;
+  if (dom.zoomLevelMobile) {
+    dom.zoomLevelMobile.textContent = zoomText;
+  }
+}
+
+function scheduleZoomUpdate(nextZoom, anchor) {
+  pendingZoom = { nextZoom, anchor };
+  if (zoomFrame) {
+    return;
+  }
+  zoomFrame = window.requestAnimationFrame(() => {
+    zoomFrame = null;
+    const payload = pendingZoom;
+    pendingZoom = null;
+    if (!payload) {
+      return;
+    }
+    setZoom(payload.nextZoom, payload.anchor);
+  });
 }
 
 function centerBoardInArena() {
@@ -116,10 +145,9 @@ function renderApp() {
     }
   }
   dom.board.setAttribute("viewBox", `0 0 ${boardCells.viewWidth} ${boardCells.viewHeight}`);
-  dom.board.style.width = `${Math.round(viewport.baseBoardWidth * viewport.zoom)}px`;
+  applyZoomPresentation();
   dom.boardWrapper.classList.toggle("ai-thinking", Boolean(store.state.aiThinking));
   applyStaticTranslations();
-  dom.zoomLevel.textContent = t("zoom.level", { percent: Math.round(viewport.zoom * 100) });
   dom.hintButton.textContent = store.state.hintCells?.length ? t("button.hide") : t("button.hint");
   dom.pauseAiButton.textContent = store.state.aiPaused ? t("button.resume") : t("button.pause");
   dom.pauseAiButton.disabled = store.state.gameOver || !aiTurnActive;
@@ -158,14 +186,23 @@ function applyStaticTranslations() {
   dom.board.setAttribute("aria-label", t("app.boardAriaLabel"));
   dom.langHuButton.setAttribute("aria-label", t("aria.langHungarian"));
   dom.langEnButton.setAttribute("aria-label", t("aria.langEnglish"));
+  dom.langHuFooterButton?.setAttribute("aria-label", t("aria.langHungarian"));
+  dom.langEnFooterButton?.setAttribute("aria-label", t("aria.langEnglish"));
   dom.langHuButton.closest(".language-switcher")?.setAttribute("aria-label", t("aria.languageSelector"));
+  dom.langHuFooterButton?.closest(".language-switcher")?.setAttribute("aria-label", t("aria.languageSelector"));
   dom.langHuButton.querySelector("img")?.setAttribute("alt", t("aria.flagHungarian"));
   dom.langEnButton.querySelector("img")?.setAttribute("alt", t("aria.flagEnglish"));
+  dom.langHuFooterButton?.querySelector("img")?.setAttribute("alt", t("aria.flagHungarian"));
+  dom.langEnFooterButton?.querySelector("img")?.setAttribute("alt", t("aria.flagEnglish"));
   dom.hintButton.textContent = store.state.hintCells?.length ? t("button.hide") : t("button.hint");
   dom.passButton.textContent = t("button.pass");
   dom.pauseAiButton.textContent = store.state.aiPaused ? t("button.resume") : t("button.pause");
   dom.newGameButton.textContent = t("button.newGame");
+  dom.newGameButtonMobile && (dom.newGameButtonMobile.textContent = t("button.newGame"));
   dom.zoomResetButton.textContent = t("button.resetZoom");
+  if (dom.zoomResetButtonMobile) {
+    dom.zoomResetButtonMobile.textContent = t("button.resetZoom");
+  }
   dom.playerStatusLabel.textContent = t("panel.playerStatus");
   dom.rulesLabel.textContent = t("panel.rules");
   dom.matchResultLabel.textContent = t("panel.matchResult");
@@ -190,9 +227,12 @@ function applyStaticTranslations() {
   });
   dom.langHuButton.classList.toggle("active", getLanguage() === "hu");
   dom.langEnButton.classList.toggle("active", getLanguage() === "en");
+  dom.langHuFooterButton?.classList.toggle("active", getLanguage() === "hu");
+  dom.langEnFooterButton?.classList.toggle("active", getLanguage() === "en");
 }
 
 dom.newGameButton.addEventListener("click", openSetupModal);
+dom.newGameButtonMobile?.addEventListener("click", openSetupModal);
 if (dom.passButton) {
   dom.passButton.addEventListener("click", applyPassTurn);
 }
@@ -203,6 +243,16 @@ dom.langHuButton.addEventListener("click", async () => {
   renderApp();
 });
 dom.langEnButton.addEventListener("click", async () => {
+  await setLanguage("en");
+  renderSetupModal(dom, setupDraft);
+  renderApp();
+});
+dom.langHuFooterButton?.addEventListener("click", async () => {
+  await setLanguage("hu");
+  renderSetupModal(dom, setupDraft);
+  renderApp();
+});
+dom.langEnFooterButton?.addEventListener("click", async () => {
   await setLanguage("en");
   renderSetupModal(dom, setupDraft);
   renderApp();
@@ -415,13 +465,16 @@ window.addEventListener("keydown", (event) => {
 dom.zoomResetButton.addEventListener("click", () => {
   setZoom(1);
 });
+dom.zoomResetButtonMobile?.addEventListener("click", () => {
+  setZoom(1);
+});
 
 dom.boardWrapper.addEventListener(
   "wheel",
   (event) => {
     event.preventDefault();
     const delta = event.deltaY < 0 ? 0.1 : -0.1;
-    setZoom(viewport.zoom + delta, { clientX: event.clientX, clientY: event.clientY });
+    scheduleZoomUpdate(viewport.zoom + delta, { clientX: event.clientX, clientY: event.clientY });
   },
   { passive: false },
 );
@@ -469,7 +522,7 @@ dom.boardWrapper.addEventListener("pointermove", (event) => {
     const nextDistance = distanceBetweenPoints(first, second);
     if (nextDistance > 0) {
       const scale = nextDistance / pinchState.distance;
-      setZoom(pinchState.zoom * scale, pinchState.anchor);
+      scheduleZoomUpdate(pinchState.zoom * scale, pinchState.anchor);
     }
     event.preventDefault();
     return;

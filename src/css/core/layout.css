@@ -48,6 +48,21 @@ body {
   gap: 10px;
 }
 
+.header-zoom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-board-actions {
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.mobile-only {
+  display: none;
+}
+
 .brand-block {
   display: flex;
   align-items: center;
@@ -231,13 +246,15 @@ dialog {
   .site-header {
     position: sticky;
     top: 0;
-    grid-template-columns: 1fr;
-    gap: 0;
-    padding: 10px 14px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
   }
 
   .brand-block {
     gap: 0;
+    min-width: 0;
   }
 
   .brand-block button,
@@ -246,13 +263,38 @@ dialog {
   }
 
   .header-actions,
-  .language-switcher,
   .board-actions {
     display: flex;
   }
 
   .header-actions {
+    gap: 8px;
+    flex-wrap: nowrap;
     justify-self: end;
+  }
+
+  .board-actions {
+    flex-wrap: nowrap;
+  }
+
+  .board-actions #new-game-button {
+    display: none;
+  }
+
+  .header-language {
+    display: none;
+  }
+
+  .mobile-only {
+    display: flex;
+  }
+
+  .site-title {
+    font-size: 1.35rem;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .app-shell {
@@ -275,6 +317,10 @@ dialog {
   .board-stage {
     padding: 8px;
     border-radius: 18px;
+  }
+
+  .mobile-board-actions {
+    width: 100%;
   }
 
   .board-wrapper {
@@ -312,5 +358,14 @@ dialog {
   .footer-zoom {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .footer-zoom-controls {
+    display: none;
+  }
+
+  .footer-language {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
