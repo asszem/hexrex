@@ -24,6 +24,10 @@ export function renderSetupModal(dom, draft) {
             maxlength="20"
             value="${escapeAttribute(player.name)}"
           />
+          <select class="setup-player-control" data-player-index="${index}">
+            <option value="human" ${player.controlType !== "ai" ? "selected" : ""}>Human</option>
+            <option value="ai" ${player.controlType === "ai" ? "selected" : ""}>AI</option>
+          </select>
         </article>
       `,
     )

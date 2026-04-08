@@ -30,14 +30,7 @@ export function renderBoard(dom, boardCells, state) {
       polygon.style.setProperty("--preview-stroke", state.preview.valid ? "#fff4cc" : "#5c0b10");
     }
 
-    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    label.setAttribute("x", String(cell.x));
-    label.setAttribute("y", String(cell.y + 4));
-    label.setAttribute("class", "cell-label");
-    label.textContent = cell.id;
-
     group.appendChild(polygon);
-    group.appendChild(label);
     dom.board.appendChild(group);
   }
 }

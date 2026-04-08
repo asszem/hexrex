@@ -1,6 +1,4 @@
 import {
-  BOARD_VIEW_HEIGHT,
-  BOARD_VIEW_WIDTH,
   DIRECTIONS,
   HEX_RADIUS,
   HEX_VERTICAL_STEP,
@@ -9,8 +7,9 @@ import {
 
 export function createBoardCells(boardSize) {
   const cells = [];
-  const xOffset = (BOARD_VIEW_WIDTH - HEX_WIDTH * (boardSize - 0.5)) / 2;
-  const yOffset = (BOARD_VIEW_HEIGHT - (HEX_RADIUS * 2 + HEX_VERTICAL_STEP * (boardSize - 1))) / 2;
+  const padding = HEX_RADIUS + 20;
+  const xOffset = padding + HEX_WIDTH / 2;
+  const yOffset = padding + HEX_RADIUS;
 
   for (let row = 0; row < boardSize; row += 1) {
     const rowOffset = row % 2 === 0 ? 0 : HEX_WIDTH / 2;
@@ -27,6 +26,9 @@ export function createBoardCells(boardSize) {
       });
     }
   }
+
+  cells.viewWidth = Math.ceil(padding * 2 + HEX_WIDTH * boardSize + HEX_WIDTH / 2);
+  cells.viewHeight = Math.ceil(padding * 2 + HEX_RADIUS * 2 + HEX_VERTICAL_STEP * (boardSize - 1));
 
   return cells;
 }

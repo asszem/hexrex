@@ -38,13 +38,15 @@
         <section class="board-stage">
           <div class="board-wrapper">
             <div id="arena-turn-indicator" class="arena-turn-indicator" aria-live="polite"></div>
-            <svg
-              id="board"
-              class="board-svg"
-              viewBox="0 0 960 900"
-              role="img"
-              aria-label="HexRex game board"
-            ></svg>
+            <div id="board-content" class="board-content">
+              <svg
+                id="board"
+                class="board-svg"
+                viewBox="0 0 960 900"
+                role="img"
+                aria-label="HexRex game board"
+              ></svg>
+            </div>
           </div>
         </section>
       </section>
@@ -72,6 +74,10 @@
 
     <footer class="site-footer">
       <p>F5 quick-save, F9 quick-load, right-click hex to undo.</p>
+      <div class="footer-zoom">
+        <p id="zoom-level">Zoom 100%</p>
+        <button id="zoom-reset-button" type="button">Reset</button>
+      </div>
     </footer>
 
     <dialog id="endgame-modal" class="endgame-modal">

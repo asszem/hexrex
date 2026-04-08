@@ -1,6 +1,8 @@
 export function getDomRefs() {
   return {
     board: document.getElementById("board"),
+    boardWrapper: document.querySelector(".board-wrapper"),
+    boardContent: document.getElementById("board-content"),
     newGameButton: document.getElementById("new-game-button"),
     undoButton: document.getElementById("undo-button"),
     arenaTurnIndicator: document.getElementById("arena-turn-indicator"),
@@ -17,5 +19,7 @@ export function getDomRefs() {
     endgameModal: document.getElementById("endgame-modal"),
     endgameSummary: document.getElementById("endgame-summary"),
     toastRoot: document.getElementById("toast-root"),
+    zoomLevel: document.getElementById("zoom-level"),
+    zoomResetButton: document.getElementById("zoom-reset-button"),
   };
 }

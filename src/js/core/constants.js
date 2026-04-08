@@ -1,5 +1,5 @@
 export const DEFAULT_GRID_SIZE = 9;
-export const GRID_SIZE_OPTIONS = [7, 9, 11];
+export const GRID_SIZE_OPTIONS = [7, 9, 11, 19];
 export const MAX_PLAYERS = 6;
 export const BOARD_VIEW_WIDTH = 960;
 export const BOARD_VIEW_HEIGHT = 900;
@@ -22,6 +22,7 @@ export function createDefaultPlayers(count = 2) {
     return {
       id: `player${index + 1}`,
       name: `Player ${index + 1}`,
+      controlType: index === 0 ? "human" : index === 1 ? "ai" : "human",
       ...palette,
     };
   });

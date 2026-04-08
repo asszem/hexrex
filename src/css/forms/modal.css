@@ -33,7 +33,7 @@
 
 .setup-player-row {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
@@ -43,6 +43,13 @@
 
 .setup-player-input {
   width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(24, 34, 47, 0.12);
+  background: #fffdf7;
+}
+
+.setup-player-control {
   padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid rgba(24, 34, 47, 0.12);

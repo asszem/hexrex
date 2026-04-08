@@ -9,6 +9,8 @@ import { updatePreview } from "./hover-preview.js";
 import { clearPreview } from "./selection-state.js";
 
 export function bindBoardInteraction(store, dom, renderApp) {
+  let pendingTap = null;
+
   function undoLastMove() {
     const undone = popHistorySnapshot(store.state);
     store.state.status = undone ? "Last move undone." : "No move to undo.";
@@ -47,9 +49,41 @@ export function bindBoardInteraction(store, dom, renderApp) {
     if (!polygon || store.state.gameOver) {
       return;
     }
-    event.preventDefault();
+    pendingTap = {
+      key: polygon.dataset.key,
+      x: event.clientX,
+      y: event.clientY,
+      startedAt: performance.now(),
+      pointerId: event.pointerId,
+    };
+  });
 
-    const preview = updatePreview(store.state, polygon.dataset.key);
+  window.addEventListener("pointermove", (event) => {
+    if (!pendingTap || pendingTap.pointerId !== event.pointerId) {
+      return;
+    }
+    const moved = Math.hypot(event.clientX - pendingTap.x, event.clientY - pendingTap.y);
+    if (moved > 8) {
+      pendingTap = null;
+    }
+  });
+
+  window.addEventListener("pointerup", (event) => {
+    if (!pendingTap || pendingTap.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const duration = performance.now() - pendingTap.startedAt;
+    const moved = Math.hypot(event.clientX - pendingTap.x, event.clientY - pendingTap.y);
+    const polygon = document.elementFromPoint(event.clientX, event.clientY)?.closest("polygon[data-key]");
+    const tapKey = pendingTap.key;
+    pendingTap = null;
+
+    if (duration > 180 || moved > 8 || !polygon || polygon.dataset.key !== tapKey || store.state.gameOver) {
+      return;
+    }
+
+    const preview = updatePreview(store.state, tapKey);
     if (!preview.valid) {
       store.state.status = preview.reason;
       renderApp();
@@ -85,6 +119,10 @@ export function bindBoardInteraction(store, dom, renderApp) {
     }
     saveAuto(store.state);
     renderApp();
+  });
+
+  window.addEventListener("pointercancel", () => {
+    pendingTap = null;
   });
 
   dom.board.addEventListener("contextmenu", (event) => {
