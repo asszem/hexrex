@@ -225,13 +225,13 @@ body {
   }
 
   .brand-block button,
-  .header-center,
-  .board-actions {
+  .header-center {
     display: none;
   }
 
   .header-actions,
-  .language-switcher {
+  .language-switcher,
+  .board-actions {
     display: flex;
   }
 

@@ -9,18 +9,21 @@ export function renderEndgame(dom, result, state) {
     .map(
       ([playerId, entry]) => `
         <article class="summary-row" style="border-color:${withAlpha(playerMap[playerId]?.fill, 0.28)}; box-shadow: 0 0 0 1px ${withAlpha(playerMap[playerId]?.fill, 0.08)} inset;">
-          <h3 style="color:${playerMap[playerId]?.fill ?? "inherit"}">${formatPlayerLabel(playerMap[playerId])}</h3>
-          <dl class="summary-metrics">
+          <header class="summary-row-header">
+            <h3 style="color:${playerMap[playerId]?.fill ?? "inherit"}">${formatPlayerLabel(playerMap[playerId])}</h3>
+            <strong class="summary-total">${t("endgame.score")}: ${entry.score}</strong>
+          </header>
+          <dl class="summary-metrics summary-score-metrics">
             <div>
-              <dt>${t("endgame.score")}</dt>
-              <dd>${entry.score}</dd>
+              <dt>${t("score.ownedHexes")}</dt>
+              <dd>${entry.owned}</dd>
             </div>
             <div>
-              <dt>${t("endgame.captured")}</dt>
+              <dt>${t("score.capturedBonus")}</dt>
               <dd>${entry.captured}</dd>
             </div>
             <div>
-              <dt>${t("endgame.longestLine")}</dt>
+              <dt>${t("score.longestLine")}</dt>
               <dd>${entry.longestLine}</dd>
             </div>
           </dl>
@@ -29,8 +32,13 @@ export function renderEndgame(dom, result, state) {
     )
     .join("");
 
+  dom.endgameSummary.innerHTML = rankedPlayers;
+
   const heading = document.createElement("p");
   heading.className = "winner-line";
+  if (result.winnerId) {
+    heading.style.color = playerMap[result.winnerId]?.fill ?? "";
+  }
   heading.textContent = t("endgame.winner", {
     name: result.winnerId ? formatPlayerLabel(playerMap[result.winnerId]) : result.winnerName,
   });

@@ -14,7 +14,7 @@ import { showToast } from "../ui/toast.js";
 import { bindBoardInteraction } from "../ui/board-interaction.js";
 import { chooseAiMove } from "../ai/select-move.js";
 import { applyResolvedMove } from "./apply-move.js";
-import { evaluateGameOver } from "./game-over.js";
+import { evaluateGameOver, getForcedPassReason } from "./game-over.js";
 import { buildPlacementPreview } from "./placement-rules.js";
 import { buildRemovalPreview } from "./removal-rules.js";
 import { getAvailablePlacementKeys } from "./move-validation.js";
@@ -32,6 +32,9 @@ let lastStartedSetup = createSetupDraft(autoLoadedState ?? createInitialState())
 let setupDraft = createSetupDraft(lastStartedSetup);
 let aiTurnTimer = null;
 let aiTurnToken = 0;
+let aiReplayTimer = null;
+let aiQueueWorkerActive = false;
+let queuedAiStates = [];
 const viewport = {
   zoom: 1,
   minZoom: 0.6,
@@ -75,7 +78,7 @@ function renderApp() {
   const activePlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
   const aiTurnActive = Boolean(activePlayer && activePlayer.controlType === "ai" && !store.state.gameOver);
   if (aiTurnActive) {
-    store.state.aiThinking = !store.state.aiPaused;
+    store.state.aiThinking = !store.state.aiPaused && queuedAiStates.length === 0;
     store.state.preview = null;
     store.state.hoverKey = null;
   }
@@ -85,6 +88,21 @@ function renderApp() {
       store.state.gameOver = true;
       store.state.winner = gameOver;
       store.state.status = t("status.wins", { name: gameOver.winnerName });
+    }
+  }
+  if (!store.state.gameOver) {
+    const forcedPassReason = getForcedPassReason(store.state);
+    if (forcedPassReason) {
+      const currentPlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
+      applyResolvedMove(store.state, {
+        type: "pass",
+        valid: true,
+        cells: [],
+        reason: forcedPassReason,
+        playerId: currentPlayer?.id,
+      });
+      renderApp();
+      return;
     }
   }
   dom.board.setAttribute("viewBox", `0 0 ${boardCells.viewWidth} ${boardCells.viewHeight}`);
@@ -297,6 +315,7 @@ dom.confirmAddPlayer.addEventListener("click", () => {
 });
 
 dom.confirmNewGame.addEventListener("click", () => {
+  clearAiAsyncWork();
   lastStartedSetup = createSetupDraft(setupDraft);
   resetGame(store, {
     boardSize: setupDraft.boardSize,
@@ -323,13 +342,14 @@ function applyPassTurn() {
     return;
   }
   const player = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
+  const forcedPassReason = getForcedPassReason(store.state);
   applyResolvedMove(store.state, {
     type: "pass",
     valid: true,
     cells: [],
-    reason: hasAnyLegalPlacement(store.state, store.state.currentPlayer, buildPlacementPreview)
+    reason: forcedPassReason ?? (hasAnyLegalPlacement(store.state, store.state.currentPlayer, buildPlacementPreview)
       ? t("status.playerPasses", { name: player?.name ?? t("status.currentPlayer") })
-      : t("status.playerMustPass", { name: player?.name ?? t("status.currentPlayer") }),
+      : t("status.playerMustPass", { name: player?.name ?? t("status.currentPlayer") })),
   });
   renderApp();
 }
@@ -358,6 +378,7 @@ window.addEventListener("keydown", (event) => {
       renderApp();
       return;
     }
+    clearAiAsyncWork();
     store.state = quickState;
     lastStartedSetup = createSetupDraft(quickState);
     boardCells = createBoardCells(store.state.boardSize);
@@ -467,6 +488,10 @@ function scheduleAiTurn() {
     window.clearTimeout(aiTurnTimer);
     aiTurnTimer = null;
   }
+  if (aiReplayTimer) {
+    window.clearTimeout(aiReplayTimer);
+    aiReplayTimer = null;
+  }
   aiTurnToken += 1;
   const currentToken = aiTurnToken;
 
@@ -479,12 +504,21 @@ function scheduleAiTurn() {
   if (!player || player.controlType !== "ai") {
     store.state.aiThinking = false;
     store.state.aiPaused = false;
+    queuedAiStates = [];
     return;
   }
 
   if (store.state.aiPaused) {
     store.state.aiThinking = false;
     store.state.status = t("status.aiPaused", { name: player.name });
+    if (allPlayersAreAi(store.state)) {
+      queueAiPausedStates(currentToken);
+    }
+    return;
+  }
+
+  if (queuedAiStates.length > 0) {
+    replayQueuedAiStates(currentToken);
     return;
   }
 
@@ -519,6 +553,81 @@ function scheduleAiTurn() {
   }, 260);
 }
 
+function replayQueuedAiStates(token) {
+  aiReplayTimer = window.setTimeout(() => {
+    if (token !== aiTurnToken || store.state.aiPaused || queuedAiStates.length === 0) {
+      return;
+    }
+    store.state = queuedAiStates.shift();
+    store.state.aiPaused = false;
+    store.state.aiThinking = false;
+    renderApp();
+  }, 90);
+}
+
+async function queueAiPausedStates(token) {
+  if (aiQueueWorkerActive || queuedAiStates.length >= 24) {
+    return;
+  }
+
+  aiQueueWorkerActive = true;
+  const simulated = cloneQueuedState(queuedAiStates.at(-1) ?? store.state);
+
+  try {
+    while (token === aiTurnToken && store.state.aiPaused && allPlayersAreAi(store.state) && queuedAiStates.length < 24 && !simulated.gameOver) {
+      const activePlayer = simulated.players.find((entry) => entry.id === simulated.currentPlayer);
+      if (!activePlayer || activePlayer.controlType !== "ai") {
+        break;
+      }
+      const move = await chooseAiMove(simulated, activePlayer, {
+        shouldAbort: () => token !== aiTurnToken || !store.state.aiPaused || !allPlayersAreAi(store.state) || queuedAiStates.length >= 24,
+      });
+      if (!move) {
+        break;
+      }
+      applyResolvedMove(simulated, move, { persist: false });
+      queuedAiStates.push(cloneQueuedState(simulated));
+    }
+  } finally {
+    aiQueueWorkerActive = false;
+  }
+}
+
+function cloneQueuedState(state) {
+  return {
+    ...state,
+    players: state.players.map((player) => ({ ...player })),
+    cells: new Map(Array.from(state.cells.entries(), ([key, value]) => [key, { ...value }])),
+    history: state.history.map((entry) => ({
+      ...entry,
+      players: (entry.players ?? state.players).map((player) => ({ ...player })),
+      cells: new Map(Array.from((entry.cells ?? state.cells).entries(), ([key, value]) => [key, { ...value }])),
+    })),
+    preview: null,
+    hintCells: [],
+    aiThinking: false,
+    aiPaused: false,
+  };
+}
+
+function allPlayersAreAi(state) {
+  return state.players.every((player) => player.controlType === "ai");
+}
+
+function clearAiAsyncWork() {
+  queuedAiStates = [];
+  aiQueueWorkerActive = false;
+  aiTurnToken += 1;
+  if (aiTurnTimer) {
+    window.clearTimeout(aiTurnTimer);
+    aiTurnTimer = null;
+  }
+  if (aiReplayTimer) {
+    window.clearTimeout(aiReplayTimer);
+    aiReplayTimer = null;
+  }
+}
+
 function toggleAiPause() {
   const activePlayer = store.state.players.find((entry) => entry.id === store.state.currentPlayer);
   if (!activePlayer || activePlayer.controlType !== "ai" || store.state.gameOver) {
@@ -548,6 +657,7 @@ function buildRuleLines(rules) {
     rules.borderProtection ? t("rules.borderProtection.on") : t("rules.borderProtection.off"),
     rules.removeHex ? t("rules.removeHex.on") : t("rules.removeHex.off"),
     t("rules.passAllowed"),
+    t("rules.forcedPasses"),
     t("rules.allPassEnd"),
     t("rules.capturedDouble"),
   ];

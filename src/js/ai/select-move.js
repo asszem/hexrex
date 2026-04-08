@@ -6,11 +6,17 @@ import { getScoreSummary } from "../core/scoring.js";
 import { applyResolvedMove } from "../core/apply-move.js";
 import { t } from "../core/i18n.js";
 import { getNeighbors } from "../core/board.js";
+import { getForcedPassReason } from "../core/game-over.js";
 
 const COLLECTION_BATCH_SIZE = 24;
 const SCORING_BATCH_SIZE = 8;
 
 export async function chooseAiMove(state, player, options = {}) {
+  const forcedPassReason = getForcedPassReason(state, player.id);
+  if (forcedPassReason) {
+    return buildPassMove(state, player, forcedPassReason);
+  }
+
   const maxMoves = getCandidateLimit(state, player);
   const moves = await collectCandidateMoves(state, maxMoves, options);
   if (moves.length === 0) {

@@ -1,6 +1,24 @@
 import { getScoreSummary } from "./scoring.js";
 import { t } from "./i18n.js";
 
+export function getForcedPassReason(state, playerId = state.currentPlayer) {
+  const player = state.players.find((entry) => entry.id === playerId);
+  if (!player) {
+    return null;
+  }
+
+  if (!playerOwnsAnyHex(state, playerId)) {
+    return t("status.playerNoHexesMustPass", { name: player.name });
+  }
+
+  const activePlayers = state.players.filter((entry) => !entry.passedLastTurn);
+  if (activePlayers.length === 1 && activePlayers[0].id === playerId && state.players.length > 1) {
+    return t("status.lastRemainingMustPass", { name: player.name });
+  }
+
+  return null;
+}
+
 export function evaluateGameOver(state, placementFn, removalFn) {
   if ((state.consecutivePasses ?? 0) < state.players.length) {
     return null;
@@ -34,4 +52,13 @@ function comparePlayers(scores, leftId, rightId) {
     return left.longestLine - right.longestLine;
   }
   return 0;
+}
+
+function playerOwnsAnyHex(state, playerId) {
+  for (const cell of state.cells.values()) {
+    if (cell.owner === playerId) {
+      return true;
+    }
+  }
+  return false;
 }

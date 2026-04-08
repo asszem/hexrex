@@ -32,8 +32,21 @@
 }
 
 .summary-row h3 {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 1rem;
+}
+
+.summary-row-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.summary-total {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .summary-metrics {
